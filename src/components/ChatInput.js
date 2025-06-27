@@ -4,13 +4,30 @@ import { useModel } from '../contexts/ModelContext';
 
 const ChatInput = ({ onSendMessage, disabled }) => {
   const [message, setMessage] = useState('');
-  // Add states to track which tools are active
-  const [activeTools, setActiveTools] = useState({
-    saveEarth: false,
-    search: false,
-    write: false,
-    research: false
+  // Add states to track which tools are active - initialize from localStorage if available
+  const [activeTools, setActiveTools] = useState(() => {
+    // Try to get saved state from localStorage
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('activeTools');
+      if (savedState) {
+        return JSON.parse(savedState);
+      }
+    }
+    // Default state if nothing in localStorage
+    return {
+      saveEarth: false,
+      search: false,
+      write: false,
+      research: false
+    };
   });
+  
+  // Save activeTools state to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeTools', JSON.stringify(activeTools));
+    }
+  }, [activeTools]);
   const [isListening, setIsListening] = useState(false);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
@@ -83,13 +100,20 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       setMessage('');
       
       // Only reset search, write, and research tools, but keep saveEarth state
-      setActiveTools(prev => ({
-        ...prev,
+      const updatedTools = {
+        ...activeTools,
         search: false,
         write: false,
         research: false
         // saveEarth remains unchanged
-      }));
+      };
+      
+      setActiveTools(updatedTools);
+      
+      // Explicitly save to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('activeTools', JSON.stringify(updatedTools));
+      }
     }
   };
   
@@ -279,10 +303,16 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                       className="ml-1 text-xs text-green-600 hover:text-green-800" 
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent the tools menu from opening
-                        setActiveTools(prev => ({
-                          ...prev,
+                        const updatedTools = {
+                          ...activeTools,
                           saveEarth: false
-                        }));
+                        };
+                        setActiveTools(updatedTools);
+                        
+                        // Explicitly save to localStorage
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem('activeTools', JSON.stringify(updatedTools));
+                        }
                       }}
                     >
                       ✕
@@ -301,13 +331,19 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                       onClick={() => {
                         setIsToolsMenuOpen(false);
                         // Toggle saveEarth state if it's already active
-                        setActiveTools(prev => ({
-                          ...prev,
-                          saveEarth: !prev.saveEarth,
+                        const updatedTools = {
+                          ...activeTools,
+                          saveEarth: !activeTools.saveEarth,
                           search: false,
                           write: false,
                           research: false
-                        }));
+                        };
+                        setActiveTools(updatedTools);
+                        
+                        // Explicitly save to localStorage
+                        if (typeof window !== 'undefined') {
+                          localStorage.setItem('activeTools', JSON.stringify(updatedTools));
+                        }
                         // Focus the textarea
                         setTimeout(() => {
                           if (textareaRef.current) {

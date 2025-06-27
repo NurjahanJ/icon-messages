@@ -82,13 +82,14 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       onSendMessage(message, selectedModel.id);
       setMessage('');
       
-      // Reset all active tools
-      setActiveTools({
-        saveEarth: false,
+      // Only reset search, write, and research tools, but keep saveEarth state
+      setActiveTools(prev => ({
+        ...prev,
         search: false,
         write: false,
         research: false
-      });
+        // saveEarth remains unchanged
+      }));
     }
   };
   
@@ -274,6 +275,18 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                       <path d="M3.99999 21C5.50005 15.5 6 12.5 12 9.99997" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     <span className="text-sm font-medium">Save</span>
+                    <button 
+                      className="ml-1 text-xs text-green-600 hover:text-green-800" 
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent the tools menu from opening
+                        setActiveTools(prev => ({
+                          ...prev,
+                          saveEarth: false
+                        }));
+                      }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 )}
               </button>
@@ -287,9 +300,10 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                       role="menuitem"
                       onClick={() => {
                         setIsToolsMenuOpen(false);
+                        // Toggle saveEarth state if it's already active
                         setActiveTools(prev => ({
                           ...prev,
-                          saveEarth: true,
+                          saveEarth: !prev.saveEarth,
                           search: false,
                           write: false,
                           research: false

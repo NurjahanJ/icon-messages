@@ -212,18 +212,52 @@ const ChatInput = ({ onSendMessage, disabled }) => {
 
   return (
     <div className="pt-2 px-4 pb-4 bg-white">
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-        <div className="relative rounded-3xl border bg-white border-gray-200 shadow-sm overflow-hidden">
-          {/* Input area that replaces 'Ask anything' with user text */}
-          <div className="px-4 pt-4 pb-3 cursor-text" onClick={handlePlaceholderClick}>
-            {message || isInputActive ? (
-              <textarea
-                ref={textareaRef}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setIsInputActive(true)}
-                onBlur={() => setIsInputActive(message.length > 0)}
+      <div className="max-w-3xl mx-auto">
+        {/* Save the Earth banner */}
+        {activeTools.saveEarth && (
+          <div className="flex items-center mb-2 py-2 px-4 bg-gray-100 rounded-lg">
+            <div className="flex items-center">
+              <svg className="h-4 w-4 mr-2 text-green-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4.44893 17.009C-0.246384 7.83762 7.34051 0.686125 19.5546 3.61245C20.416 3.81881 21.0081 4.60984 20.965 5.49452C20.5862 13.288 17.0341 17.7048 6.13252 17.9857C5.43022 18.0038 4.76908 17.6344 4.44893 17.009Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M3.99999 21C5.50005 15.5 6 12.5 12 9.99997" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-sm text-green-600 font-medium">Efficient prompts save energy 🌱</span>
+            </div>
+            <button 
+              className="ml-auto text-xs text-gray-500 hover:text-gray-700" 
+              onClick={(e) => {
+                e.preventDefault();
+                const updatedTools = {
+                  ...activeTools,
+                  saveEarth: false
+                };
+                setActiveTools(updatedTools);
+                
+                // Explicitly save to localStorage
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('activeTools', JSON.stringify(updatedTools));
+                }
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit} className="relative">
+          <div className={`relative rounded-xl border ${isInputActive ? 'border-blue-500' : 'border-gray-300'} shadow-sm`}>
+            {/* Input area that replaces 'Ask anything' with user text */}
+            <div className="px-4 pt-4 pb-3 cursor-text" onClick={handlePlaceholderClick}>
+              {message || isInputActive ? (
+                <textarea
+                  ref={textareaRef}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setIsInputActive(true)}
+                  onBlur={() => setIsInputActive(message.length > 0)}
                 placeholder=""
                 disabled={disabled || hasReachedLimit}
                 className="w-full resize-none bg-transparent border-0 focus:ring-0 focus:outline-none text-gray-900 p-0 m-0"
@@ -457,6 +491,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
           {disabled ? 'Processing your request...' : ''}
         </div>
       </form>
+      </div>
     </div>
   );
 };

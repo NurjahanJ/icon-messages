@@ -9,7 +9,7 @@ import SustainabilityPrompt from './components/SustainabilityPrompt';
 function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentConversationId, setCurrentConversationId] = useState('1');
+  //const [currentConversationId, setCurrentConversationId] = useState('1');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [promptCount, setPromptCount] = useState(0);
   const messagesEndRef = useRef(null);

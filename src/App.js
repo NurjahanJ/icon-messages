@@ -9,7 +9,6 @@ import SustainabilityPrompt from './components/SustainabilityPrompt';
 function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
-  //const [currentConversationId, setCurrentConversationId] = useState('1');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [promptCount, setPromptCount] = useState(0);
   const messagesEndRef = useRef(null);
@@ -104,7 +103,6 @@ function App() {
           <button 
             onClick={() => {
               setMessages([]);
-              setCurrentConversationId('1');
               setPromptCount(0);
             }}
             className="p-2 hover:bg-gray-200 rounded-md"
@@ -125,12 +123,10 @@ function App() {
           <button
             onClick={() => {
               setMessages([]);
-              setCurrentConversationId('1');
               setPromptCount(0);
             }}
             className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200"
           >
-            {/* New Chat SVG */}
             New chat
           </button>
         </div>
@@ -139,7 +135,6 @@ function App() {
 
         <div className="border-t border-gray-200 p-2">
           <button className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
-            {/* View plans SVG */}
             View plans
           </button>
           <div className="text-xs text-gray-500 mt-1 ml-2">Unlimited access, team features, and more</div>

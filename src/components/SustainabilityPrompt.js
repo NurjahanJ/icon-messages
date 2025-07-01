@@ -1,9 +1,28 @@
 import React, { useState } from 'react';
 
-const SustainabilityPrompt = ({ promptCount }) => {
+const SustainabilityPrompt = ({ promptCount, onSustainabilityAction }) => {
   const [showInfo, setShowInfo] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
-  if (promptCount === 3) {
+  // Handle user clicking Yes button
+  const handleYesClick = () => {
+    setShowInfo(true);
+    onSustainabilityAction('yes');
+  };
+
+  // Handle user clicking No button
+  const handleNoClick = () => {
+    setDismissed(true);
+    onSustainabilityAction('no');
+  };
+
+  // Handle user clicking Cancel (X) button
+  const handleCancelClick = () => {
+    setDismissed(true);
+    onSustainabilityAction('cancel');
+  };
+
+  if (promptCount === 3 && !dismissed) {
     return (
       <div className="bg-yellow-50 border-l-4 border-green-500 text-sm text-gray-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">
@@ -11,7 +30,7 @@ const SustainabilityPrompt = ({ promptCount }) => {
             🌱 Hey, did you know this prompt would emit around <strong>4g of CO₂</strong> and use <strong>10mL of water</strong>? Would you like to learn more about energy-efficient prompting?
           </p>
           <button 
-            onClick={() => setShowInfo(false)} 
+            onClick={handleCancelClick} 
             className="ml-2 text-gray-500 hover:text-gray-700"
           >
             ✕
@@ -20,8 +39,8 @@ const SustainabilityPrompt = ({ promptCount }) => {
         
         {!showInfo ? (
           <div className="flex gap-4">
-            <button onClick={() => setShowInfo(true)} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
-            <button className="px-3 py-1 border border-gray-400 rounded">No</button>
+            <button onClick={handleYesClick} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
+            <button onClick={handleNoClick} className="px-3 py-1 border border-gray-400 rounded">No</button>
           </div>
         ) : (
           <div className="mt-4 bg-white p-3 border border-gray-200 rounded shadow">

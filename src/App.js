@@ -206,9 +206,6 @@ function App() {
       } else if (action === 'eighth-yes') {
         // If user clicks Yes, show a thank you message and don't process the message
         if (messages.length > 0) {
-          // Get the last message (which is the 8th prompt)
-          const lastMessage = messages[messages.length - 1];
-          
           // Create a thank you message
           const thankYouMessage = createAssistantMessage("Thanks for taking a break!");
           thankYouMessage.timestamp = new Date().toISOString();

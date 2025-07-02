@@ -13,6 +13,8 @@ function App() {
   const [promptCount, setPromptCount] = useState(0);
   const [pendingMessage, setPendingMessage] = useState(null);
   const [waitingForSustainabilityAction, setWaitingForSustainabilityAction] = useState(false);
+  const [waitingForEighthAction, setWaitingForEighthAction] = useState(false);
+  const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
@@ -130,6 +132,17 @@ function App() {
       const userMessage = createUserMessage(message);
       userMessage.timestamp = new Date().toISOString();
       setMessages([...messages, userMessage]);
+    } 
+    // If this is the 8th prompt and we haven't shown the 8th message prompt yet
+    else if (newPromptCount === 8 && !eighthMessagePromptShown) {
+      setPendingMessage({ message, modelId });
+      setWaitingForEighthAction(true);
+      setEighthMessagePromptShown(true);
+      
+      // Add only the user message to the chat history without generating a response yet
+      const userMessage = createUserMessage(message);
+      userMessage.timestamp = new Date().toISOString();
+      setMessages([...messages, userMessage]);
     } else {
       // For other prompts, process normally
       processMessage(message, modelId);
@@ -138,6 +151,7 @@ function App() {
   
   // Handle user interaction with the sustainability prompt
   const handleSustainabilityAction = (action) => {
+    // Handle 3rd message sustainability prompt actions
     if (pendingMessage && waitingForSustainabilityAction) {
       if (action === 'no' || action === 'cancel') {
         // If user clicks No or Cancel, process the message normally
@@ -179,6 +193,32 @@ function App() {
           
           // Keep the sustainability prompt shown flag true so it doesn't show again
           // We've already shown it once, we don't need to show it again for the reworded prompt
+        }
+      }
+    }
+    
+    // Handle 8th message sustainability prompt actions
+    if (pendingMessage && waitingForEighthAction) {
+      if (action === 'eighth-no') {
+        // If user clicks No, process the message normally
+        processMessage(pendingMessage.message, pendingMessage.modelId);
+        setWaitingForEighthAction(false);
+      } else if (action === 'eighth-yes') {
+        // If user clicks Yes, show a thank you message and don't process the message
+        if (messages.length > 0) {
+          // Get the last message (which is the 8th prompt)
+          const lastMessage = messages[messages.length - 1];
+          
+          // Create a thank you message
+          const thankYouMessage = createAssistantMessage("Thanks for taking a break!");
+          thankYouMessage.timestamp = new Date().toISOString();
+          
+          // Update the messages with the thank you message
+          setMessages([...messages, thankYouMessage]);
+          
+          // Clear the pending message and reset waiting state
+          setPendingMessage(null);
+          setWaitingForEighthAction(false);
         }
       }
     }
@@ -319,6 +359,7 @@ function App() {
                   promptCount={promptCount} 
                   onSustainabilityAction={handleSustainabilityAction}
                   waitingForAction={waitingForSustainabilityAction}
+                  waitingForEighthAction={waitingForEighthAction}
                 />
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
               </div>

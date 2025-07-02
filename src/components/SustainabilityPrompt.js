@@ -28,6 +28,11 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
   const handleEighthNoClick = () => {
     onSustainabilityAction('eighth-no');
   };
+  
+  // Handle Continue button click
+  const handleContinueClick = () => {
+    onSustainabilityAction('continue');
+  };
 
   if (promptCount === 3 && waitingForAction) {
     return (
@@ -59,12 +64,18 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
                 <li><strong>✅ Better:</strong> "Give me 3 bullet points about Gen Z brand loyalty"</li>
               </ul>
             </div>
-            <div className="mt-3 flex justify-end">
+            <div className="mt-3 flex justify-end gap-3">
               <button 
                 onClick={() => onSustainabilityAction('reword')} 
                 className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
               >
                 Reword Prompt?
+              </button>
+              <button 
+                onClick={handleContinueClick} 
+                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Continue
               </button>
             </div>
           </>

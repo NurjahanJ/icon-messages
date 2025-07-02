@@ -11,6 +11,10 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [promptCount, setPromptCount] = useState(0);
+  const [pendingMessage, setPendingMessage] = useState(null);
+  const [waitingForSustainabilityAction, setWaitingForSustainabilityAction] = useState(false);
+  const [waitingForEighthAction, setWaitingForEighthAction] = useState(false);
+  const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
 
@@ -24,22 +28,31 @@ function App() {
     }
   };
 
-  const handleSendMessage = async (message, modelId = 'gpt-4o') => {
+  const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
 
-    setPromptCount(prev => prev + 1);
-
+    // Create user message object
     const userMessage = createUserMessage(message);
     userMessage.timestamp = new Date().toISOString();
-
+    
+    // Check if this message is already in the chat history (to avoid duplicates)
+    const isMessageAlreadyAdded = messages.some(msg => 
+      msg.role === 'user' && msg.content === message
+    );
+    
+    // Create loading message
     const loadingMessage = {
       role: 'assistant',
       content: '',
       isLoading: true,
       timestamp: new Date().toISOString(),
     };
-
-    const updatedMessages = [...messages, userMessage, loadingMessage];
+    
+    // Only add the user message if it's not already in the chat history
+    const updatedMessages = isMessageAlreadyAdded 
+      ? [...messages, loadingMessage] 
+      : [...messages, userMessage, loadingMessage];
+      
     setMessages(updatedMessages);
     setLoading(true);
 
@@ -57,8 +70,15 @@ function App() {
         "I apologize, but I couldn't generate a response.";
       const assistantMessage = createAssistantMessage(assistantContent);
       assistantMessage.timestamp = new Date().toISOString();
-
-      setMessages([...messages, userMessage, assistantMessage]);
+      
+      // If the user message was already in the chat history, don't add it again
+      const isMessageAlreadyAdded = messages.some(msg => 
+        msg.role === 'user' && msg.content === message
+      );
+      
+      setMessages(isMessageAlreadyAdded 
+        ? [...messages, assistantMessage]
+        : [...messages, userMessage, assistantMessage]);
     } catch (err) {
       console.error('Error details in App.js:', {
         message: err.message,
@@ -79,9 +99,125 @@ function App() {
       const errorMessage = createAssistantMessage(errorContent);
       errorMessage.timestamp = new Date().toISOString();
       errorMessage.isError = true;
-      setMessages([...messages, userMessage, errorMessage]);
+      
+      // If the user message was already in the chat history, don't add it again
+      const isMessageAlreadyAdded = messages.some(msg => 
+        msg.role === 'user' && msg.content === message
+      );
+      
+      setMessages(isMessageAlreadyAdded 
+        ? [...messages, errorMessage]
+        : [...messages, userMessage, errorMessage]);
     } finally {
       setLoading(false);
+      setPendingMessage(null);
+      setWaitingForSustainabilityAction(false);
+    }
+  };
+
+  // Track if we've already shown the sustainability prompt
+  const [sustainabilityPromptShown, setSustainabilityPromptShown] = useState(false);
+
+  const handleSendMessage = (message, modelId = 'gpt-4o') => {
+    const newPromptCount = promptCount + 1;
+    setPromptCount(newPromptCount);
+    
+    // If this is the third prompt and we haven't shown the sustainability prompt yet
+    if (newPromptCount === 3 && !sustainabilityPromptShown) {
+      setPendingMessage({ message, modelId });
+      setWaitingForSustainabilityAction(true);
+      setSustainabilityPromptShown(true);
+      
+      // Add only the user message to the chat history without generating a response yet
+      const userMessage = createUserMessage(message);
+      userMessage.timestamp = new Date().toISOString();
+      setMessages([...messages, userMessage]);
+    } 
+    // If this is the 8th prompt and we haven't shown the 8th message prompt yet
+    else if (newPromptCount === 8 && !eighthMessagePromptShown) {
+      setPendingMessage({ message, modelId });
+      setWaitingForEighthAction(true);
+      setEighthMessagePromptShown(true);
+      
+      // Add only the user message to the chat history without generating a response yet
+      const userMessage = createUserMessage(message);
+      userMessage.timestamp = new Date().toISOString();
+      setMessages([...messages, userMessage]);
+    } else {
+      // For other prompts, process normally
+      processMessage(message, modelId);
+    }
+  };
+  
+  // Handle user interaction with the sustainability prompt
+  const handleSustainabilityAction = (action) => {
+    // Handle 3rd message sustainability prompt actions
+    if (pendingMessage && waitingForSustainabilityAction) {
+      if (action === 'no' || action === 'cancel') {
+        // If user clicks No or Cancel, process the message normally
+        processMessage(pendingMessage.message, pendingMessage.modelId);
+      } else if (action === 'yes') {
+        // If user clicks Yes, show the tips but don't process the message yet
+        // We'll add a click handler to process when they click outside the prompt
+        const handleOutsideClick = (e) => {
+          // Check if the click is outside the sustainability prompt
+          const sustainabilityPrompt = document.querySelector('.sustainability-prompt');
+          if (sustainabilityPrompt && !sustainabilityPrompt.contains(e.target)) {
+            // Process the message when clicking outside
+            if (pendingMessage) {
+              processMessage(pendingMessage.message, pendingMessage.modelId);
+            }
+            // Remove the event listener
+            document.removeEventListener('click', handleOutsideClick);
+          }
+        };
+        
+        // Add the event listener with a slight delay to avoid immediate triggering
+        setTimeout(() => {
+          document.addEventListener('click', handleOutsideClick);
+        }, 100);
+      } else if (action === 'reword') {
+        // If user clicks Reword Prompt, remove the last message and reset the prompt count
+        // This allows the user to rewrite their third prompt
+        if (messages.length > 0) {
+          // Remove the last message (which is the third prompt)
+          const newMessages = messages.slice(0, -1);
+          setMessages(newMessages);
+          
+          // Reset the prompt count to 2 so the next message will be the third prompt again
+          setPromptCount(2);
+          
+          // Clear the pending message
+          setPendingMessage(null);
+          setWaitingForSustainabilityAction(false);
+          
+          // Keep the sustainability prompt shown flag true so it doesn't show again
+          // We've already shown it once, we don't need to show it again for the reworded prompt
+        }
+      }
+    }
+    
+    // Handle 8th message sustainability prompt actions
+    if (pendingMessage && waitingForEighthAction) {
+      if (action === 'eighth-no') {
+        // If user clicks No, process the message normally
+        processMessage(pendingMessage.message, pendingMessage.modelId);
+        setWaitingForEighthAction(false);
+      } else if (action === 'eighth-yes') {
+        // If user clicks Yes, show a thank you message and don't process the message
+        if (messages.length > 0) {
+          // Create a thank you message
+          const thankYouMessage = createAssistantMessage("Thanks for taking a break!");
+          thankYouMessage.timestamp = new Date().toISOString();
+          
+          // Update the messages with the thank you message
+          setMessages([...messages, thankYouMessage]);
+          
+          // Clear the pending message and reset waiting state
+          setPendingMessage(null);
+          setWaitingForEighthAction(false);
+        }
+      }
     }
   };
 
@@ -119,15 +255,63 @@ function App() {
           </button>
         </div>
 
-        <div className="px-2 py-1">
+        <div className="px-2 py-4 space-y-4">
           <button
             onClick={() => {
               setMessages([]);
               setPromptCount(0);
             }}
-            className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200"
+            className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200"
           >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M11 13L20 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15 4H20V9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             New chat
+          </button>
+          
+          <button className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Search chats
+          </button>
+          
+          <button className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 7H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 12H17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 17H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Library
+          </button>
+        </div>
+        
+        <div className="px-2 py-4 space-y-4">
+          <button className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Codex
+          </button>
+          
+          <button className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M15 12L10 15V9L15 12Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Sora
+          </button>
+          
+          <button className="w-full flex items-center gap-3 rounded-md px-2 py-1.5 text-sm hover:bg-gray-200">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M5 20C5 16.6863 8.13401 14 12 14C15.866 14 19 16.6863 19 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            GPTs
           </button>
         </div>
 
@@ -168,7 +352,12 @@ function App() {
             </div>
             <div className="p-4 bg-white flex justify-center">
               <div className="w-full max-w-[850px]">
-                <SustainabilityPrompt promptCount={promptCount} />
+                <SustainabilityPrompt 
+                  promptCount={promptCount} 
+                  onSustainabilityAction={handleSustainabilityAction}
+                  waitingForAction={waitingForSustainabilityAction}
+                  waitingForEighthAction={waitingForEighthAction}
+                />
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
               </div>
             </div>

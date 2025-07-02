@@ -158,24 +158,13 @@ function App() {
         processMessage(pendingMessage.message, pendingMessage.modelId);
       } else if (action === 'yes') {
         // If user clicks Yes, show the tips but don't process the message yet
-        // We'll add a click handler to process when they click outside the prompt
-        const handleOutsideClick = (e) => {
-          // Check if the click is outside the sustainability prompt
-          const sustainabilityPrompt = document.querySelector('.sustainability-prompt');
-          if (sustainabilityPrompt && !sustainabilityPrompt.contains(e.target)) {
-            // Process the message when clicking outside
-            if (pendingMessage) {
-              processMessage(pendingMessage.message, pendingMessage.modelId);
-            }
-            // Remove the event listener
-            document.removeEventListener('click', handleOutsideClick);
-          }
-        };
-        
-        // Add the event listener with a slight delay to avoid immediate triggering
-        setTimeout(() => {
-          document.addEventListener('click', handleOutsideClick);
-        }, 100);
+        // We'll wait for explicit user interaction with the Continue button
+        // The Continue button is added in the SustainabilityPrompt component
+      } else if (action === 'continue') {
+        // Process the message when the user explicitly clicks Continue
+        if (pendingMessage) {
+          processMessage(pendingMessage.message, pendingMessage.modelId);
+        }
       } else if (action === 'reword') {
         // If user clicks Reword Prompt, remove the last message and reset the prompt count
         // This allows the user to rewrite their third prompt

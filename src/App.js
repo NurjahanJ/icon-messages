@@ -29,17 +29,28 @@ function App() {
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
 
+    // Create user message object
     const userMessage = createUserMessage(message);
     userMessage.timestamp = new Date().toISOString();
-
+    
+    // Check if this message is already in the chat history (to avoid duplicates)
+    const isMessageAlreadyAdded = messages.some(msg => 
+      msg.role === 'user' && msg.content === message
+    );
+    
+    // Create loading message
     const loadingMessage = {
       role: 'assistant',
       content: '',
       isLoading: true,
       timestamp: new Date().toISOString(),
     };
-
-    const updatedMessages = [...messages, userMessage, loadingMessage];
+    
+    // Only add the user message if it's not already in the chat history
+    const updatedMessages = isMessageAlreadyAdded 
+      ? [...messages, loadingMessage] 
+      : [...messages, userMessage, loadingMessage];
+      
     setMessages(updatedMessages);
     setLoading(true);
 
@@ -57,8 +68,15 @@ function App() {
         "I apologize, but I couldn't generate a response.";
       const assistantMessage = createAssistantMessage(assistantContent);
       assistantMessage.timestamp = new Date().toISOString();
-
-      setMessages([...messages, userMessage, assistantMessage]);
+      
+      // If the user message was already in the chat history, don't add it again
+      const isMessageAlreadyAdded = messages.some(msg => 
+        msg.role === 'user' && msg.content === message
+      );
+      
+      setMessages(isMessageAlreadyAdded 
+        ? [...messages, assistantMessage]
+        : [...messages, userMessage, assistantMessage]);
     } catch (err) {
       console.error('Error details in App.js:', {
         message: err.message,
@@ -79,7 +97,15 @@ function App() {
       const errorMessage = createAssistantMessage(errorContent);
       errorMessage.timestamp = new Date().toISOString();
       errorMessage.isError = true;
-      setMessages([...messages, userMessage, errorMessage]);
+      
+      // If the user message was already in the chat history, don't add it again
+      const isMessageAlreadyAdded = messages.some(msg => 
+        msg.role === 'user' && msg.content === message
+      );
+      
+      setMessages(isMessageAlreadyAdded 
+        ? [...messages, errorMessage]
+        : [...messages, userMessage, errorMessage]);
     } finally {
       setLoading(false);
       setPendingMessage(null);
@@ -87,14 +113,18 @@ function App() {
     }
   };
 
+  // Track if we've already shown the sustainability prompt
+  const [sustainabilityPromptShown, setSustainabilityPromptShown] = useState(false);
+
   const handleSendMessage = (message, modelId = 'gpt-4o') => {
     const newPromptCount = promptCount + 1;
     setPromptCount(newPromptCount);
     
-    // If this is the third prompt, we need to wait for sustainability action
-    if (newPromptCount === 3) {
+    // If this is the third prompt and we haven't shown the sustainability prompt yet
+    if (newPromptCount === 3 && !sustainabilityPromptShown) {
       setPendingMessage({ message, modelId });
       setWaitingForSustainabilityAction(true);
+      setSustainabilityPromptShown(true);
       
       // Add only the user message to the chat history without generating a response yet
       const userMessage = createUserMessage(message);
@@ -113,8 +143,43 @@ function App() {
         // If user clicks No or Cancel, process the message normally
         processMessage(pendingMessage.message, pendingMessage.modelId);
       } else if (action === 'yes') {
-        // If user clicks Yes, show the tips and then process the message
-        processMessage(pendingMessage.message, pendingMessage.modelId);
+        // If user clicks Yes, show the tips but don't process the message yet
+        // We'll add a click handler to process when they click outside the prompt
+        const handleOutsideClick = (e) => {
+          // Check if the click is outside the sustainability prompt
+          const sustainabilityPrompt = document.querySelector('.sustainability-prompt');
+          if (sustainabilityPrompt && !sustainabilityPrompt.contains(e.target)) {
+            // Process the message when clicking outside
+            if (pendingMessage) {
+              processMessage(pendingMessage.message, pendingMessage.modelId);
+            }
+            // Remove the event listener
+            document.removeEventListener('click', handleOutsideClick);
+          }
+        };
+        
+        // Add the event listener with a slight delay to avoid immediate triggering
+        setTimeout(() => {
+          document.addEventListener('click', handleOutsideClick);
+        }, 100);
+      } else if (action === 'reword') {
+        // If user clicks Reword Prompt, remove the last message and reset the prompt count
+        // This allows the user to rewrite their third prompt
+        if (messages.length > 0) {
+          // Remove the last message (which is the third prompt)
+          const newMessages = messages.slice(0, -1);
+          setMessages(newMessages);
+          
+          // Reset the prompt count to 2 so the next message will be the third prompt again
+          setPromptCount(2);
+          
+          // Clear the pending message
+          setPendingMessage(null);
+          setWaitingForSustainabilityAction(false);
+          
+          // Keep the sustainability prompt shown flag true so it doesn't show again
+          // We've already shown it once, we don't need to show it again for the reworded prompt
+        }
       }
     }
   };
@@ -252,7 +317,8 @@ function App() {
               <div className="w-full max-w-[850px]">
                 <SustainabilityPrompt 
                   promptCount={promptCount} 
-                  onSustainabilityAction={handleSustainabilityAction} 
+                  onSustainabilityAction={handleSustainabilityAction}
+                  waitingForAction={waitingForSustainabilityAction}
                 />
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
               </div>

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 
-const SustainabilityPrompt = ({ promptCount, onSustainabilityAction }) => {
+const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForAction = false }) => {
   const [showInfo, setShowInfo] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
   // Handle user clicking Yes button
   const handleYesClick = () => {
@@ -12,19 +11,17 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction }) => {
 
   // Handle user clicking No button
   const handleNoClick = () => {
-    setDismissed(true);
     onSustainabilityAction('no');
   };
 
   // Handle user clicking Cancel (X) button
   const handleCancelClick = () => {
-    setDismissed(true);
     onSustainabilityAction('cancel');
   };
 
-  if (promptCount === 3 && !dismissed) {
+  if (promptCount === 3 && waitingForAction) {
     return (
-      <div className="bg-yellow-50 border-l-4 border-green-500 text-sm text-gray-800 p-4 rounded-md my-4">
+      <div className="sustainability-prompt bg-yellow-50 border-l-4 border-green-500 text-sm text-gray-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">
           <p className="mb-2">
             🌱 Hey, did you know this prompt would emit around <strong>4g of CO₂</strong> and use <strong>10mL of water</strong>? Would you like to learn more about energy-efficient prompting?
@@ -43,14 +40,24 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction }) => {
             <button onClick={handleNoClick} className="px-3 py-1 border border-gray-400 rounded">No</button>
           </div>
         ) : (
-          <div className="mt-4 bg-white p-3 border border-gray-200 rounded shadow">
-            <p className="font-semibold mb-2">💡 Energy-Efficient Prompting Tips:</p>
-            <ul className="list-disc ml-5 text-sm space-y-1">
-              <li><strong>❌ Vague:</strong> "Tell me about marketing"</li>
-              <li><strong>✅ Better:</strong> "Summarize 3 trends in digital marketing for 2024"</li>
-              <li><strong>✅ Better:</strong> "Give me 3 bullet points about Gen Z brand loyalty"</li>
-            </ul>
-          </div>
+          <>
+            <div className="mt-4 bg-white p-3 border border-gray-200 rounded shadow">
+              <p className="font-semibold mb-2">💡 Energy-Efficient Prompting Tips:</p>
+              <ul className="list-disc ml-5 text-sm space-y-1">
+                <li><strong>❌ Vague:</strong> "Tell me about marketing"</li>
+                <li><strong>✅ Better:</strong> "Summarize 3 trends in digital marketing for 2024"</li>
+                <li><strong>✅ Better:</strong> "Give me 3 bullet points about Gen Z brand loyalty"</li>
+              </ul>
+            </div>
+            <div className="mt-3 flex justify-end">
+              <button 
+                onClick={() => onSustainabilityAction('reword')} 
+                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Reword Prompt?
+              </button>
+            </div>
+          </>
         )}
       </div>
     );

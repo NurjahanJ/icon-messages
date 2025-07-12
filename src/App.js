@@ -17,7 +17,21 @@ function App() {
   const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-
+  const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(() => {
+    
+    if (typeof window !== 'undefined') {
+      const tools = localStorage.getItem('activeTools');
+      if (tools) {
+        try {
+          return JSON.parse(tools).saveEarth === true;
+        } catch {
+          return false;
+        }
+      }
+    }
+    return false;
+  });
+  
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -27,6 +41,22 @@ function App() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    const tools = localStorage.getItem('activeTools');
+    if (tools) {
+      try {
+        const parsed = JSON.parse(tools);
+        setIsSaveEarthEnabled(parsed.saveEarth === true);
+      } catch {
+        setIsSaveEarthEnabled(false);
+      }
+    }
+  }, 1000); // check every second
+
+  return () => clearInterval(interval);
+}, []);
 
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
@@ -121,33 +151,39 @@ function App() {
   const handleSendMessage = (message, modelId = 'gpt-4o') => {
     const newPromptCount = promptCount + 1;
     setPromptCount(newPromptCount);
-    
-    // If this is the third prompt and we haven't shown the sustainability prompt yet
+  
     if (newPromptCount === 3 && !sustainabilityPromptShown) {
-      setPendingMessage({ message, modelId });
-      setWaitingForSustainabilityAction(true);
-      setSustainabilityPromptShown(true);
-      
-      // Add only the user message to the chat history without generating a response yet
-      const userMessage = createUserMessage(message);
-      userMessage.timestamp = new Date().toISOString();
-      setMessages([...messages, userMessage]);
-    } 
-    // If this is the 8th prompt and we haven't shown the 8th message prompt yet
-    else if (newPromptCount === 8 && !eighthMessagePromptShown) {
-      setPendingMessage({ message, modelId });
-      setWaitingForEighthAction(true);
-      setEighthMessagePromptShown(true);
-      
-      // Add only the user message to the chat history without generating a response yet
-      const userMessage = createUserMessage(message);
-      userMessage.timestamp = new Date().toISOString();
-      setMessages([...messages, userMessage]);
+      if (isSaveEarthEnabled) {
+        setPendingMessage({ message, modelId });
+        setWaitingForSustainabilityAction(true);
+        setSustainabilityPromptShown(true);
+  
+        const userMessage = createUserMessage(message);
+        userMessage.timestamp = new Date().toISOString();
+        setMessages([...messages, userMessage]);
+      } else {
+        processMessage(message, modelId);
+        setSustainabilityPromptShown(true);
+      }
+    } else if (newPromptCount === 8 && !eighthMessagePromptShown) {
+      if (isSaveEarthEnabled) {
+        setPendingMessage({ message, modelId });
+        setWaitingForEighthAction(true);
+        setEighthMessagePromptShown(true);
+  
+        const userMessage = createUserMessage(message);
+        userMessage.timestamp = new Date().toISOString();
+        setMessages([...messages, userMessage]);
+      } else {
+        processMessage(message, modelId);
+        setEighthMessagePromptShown(true);
+      }
     } else {
-      // For other prompts, process normally
+      // For all other prompts
       processMessage(message, modelId);
     }
   };
+  
   
   // Handle user interaction with the sustainability prompt
   const handleSustainabilityAction = (action) => {
@@ -319,7 +355,27 @@ function App() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="text-center max-w-xl mb-6">
-              <h2 className="text-3xl mb-10">What's on the agenda today?</h2>
+            <h2 className="text-3xl mb-10 text-center">
+            <h2 className="text-3xl text-center text-gray-900 mb-10 font-normal">
+  <span className="inline-block animate-bounce mr-2">🌱</span>
+  <button
+    onClick={() => {
+      const current = JSON.parse(localStorage.getItem('activeTools') || '{}');
+      const updated = { ...current, saveEarth: true };
+      localStorage.setItem('activeTools', JSON.stringify(updated));
+      window.location.reload();
+    }}
+    className="text-green-600 underline hover:text-green-700 transition"
+  >
+    Turn on Save the Earth Tool
+  </button>{" "}
+  to make your chat more eco-friendly.
+</h2>
+
+
+
+</h2>
+             
             </div>
             <div className="w-full max-w-[850px]">
               <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
@@ -341,12 +397,14 @@ function App() {
             </div>
             <div className="p-4 bg-white flex justify-center">
               <div className="w-full max-w-[850px]">
-                <SustainabilityPrompt 
-                  promptCount={promptCount} 
-                  onSustainabilityAction={handleSustainabilityAction}
-                  waitingForAction={waitingForSustainabilityAction}
-                  waitingForEighthAction={waitingForEighthAction}
-                />
+              {isSaveEarthEnabled && (
+   <SustainabilityPrompt 
+    promptCount={promptCount} 
+    onSustainabilityAction={handleSustainabilityAction}
+    waitingForAction={waitingForSustainabilityAction}
+    waitingForEighthAction={waitingForEighthAction}
+  />
+)}
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
               </div>
             </div>

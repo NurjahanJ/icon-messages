@@ -213,7 +213,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
   return (
     <div className="pt-2 px-4 pb-4 bg-white">
       <div className="max-w-3xl mx-auto">
-        {/* Save the Earth banner */}
+        {/* Save Earth banner */}
         {activeTools.saveEarth && (
           <div className="flex items-center mb-2 py-2 px-4 bg-gray-100 rounded-lg">
             <div className="flex items-center">
@@ -221,7 +221,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                 <path d="M4.44893 17.009C-0.246384 7.83762 7.34051 0.686125 19.5546 3.61245C20.416 3.81881 21.0081 4.60984 20.965 5.49452C20.5862 13.288 17.0341 17.7048 6.13252 17.9857C5.43022 18.0038 4.76908 17.6344 4.44893 17.009Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M3.99999 21C5.50005 15.5 6 12.5 12 9.99997" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span className="text-sm text-green-600 font-medium">Efficient prompts save energy 🌱</span>
+              <span className="text-sm text-green-600 font-medium">Efficient prompts save energy</span>
             </div>
             <button 
               className="ml-auto text-xs text-gray-500 hover:text-gray-700" 
@@ -390,14 +390,14 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                         <path d="M4.44893 17.009C-0.246384 7.83762 7.34051 0.686125 19.5546 3.61245C20.416 3.81881 21.0081 4.60984 20.965 5.49452C20.5862 13.288 17.0341 17.7048 6.13252 17.9857C5.43022 18.0038 4.76908 17.6344 4.44893 17.009Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M3.99999 21C5.50005 15.5 6 12.5 12 9.99997" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Save the Earth
+                      Save Earth
                     </button>
                     <button className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" role="menuitem">
                       <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9.5 19.5V18H4.5C3.4 18 2.5 17.1 2.5 16V5C2.5 3.9 3.4 3 4.5 3H19.5C20.6 3 21.5 3.9 21.5 5V16C21.5 17.1 20.6 18 19.5 18H14.5V19.5H9.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Create an image
+                      Create image
                     </button>
                     <button 
                       className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" 
@@ -425,23 +425,16 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                         <path d="M12 3C14.5013 5.46452 15.9228 8.66283 16 12C15.9228 15.3372 14.5013 18.5355 12 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M12 3C9.49872 5.46452 8.07725 8.66283 8 12C8.07725 15.3372 9.49872 18.5355 12 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Search the web
+                      Search web
                     </button>
-                    <button className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" role="menuitem">
-                      <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M8 18L12 22L16 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 2V22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M7 5L12 2L17 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Write or code
-                    </button>
+
                     <button className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" role="menuitem">
                       <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M19.5 14.5V17.5C19.5 18.6046 18.6046 19.5 17.5 19.5H6.5C5.39543 19.5 4.5 18.6046 4.5 17.5V14.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M16.5 10.5L12 14.5L7.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         <path d="M12 14.5V4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Run deep research
+                      Deep research
                     </button>
                   </div>
                 </div>

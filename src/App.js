@@ -357,7 +357,6 @@ useEffect(() => {
             <div className="text-center max-w-xl mb-6">
             <h2 className="text-3xl mb-10 text-center">
             <h2 className="text-3xl text-center text-gray-900 mb-10 font-normal">
-  <span className="inline-block animate-bounce mr-2">🌱</span>
   <button
     onClick={() => {
       const current = JSON.parse(localStorage.getItem('activeTools') || '{}');

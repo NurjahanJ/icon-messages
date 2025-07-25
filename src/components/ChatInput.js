@@ -18,7 +18,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       saveEarth: false,
       search: false,
       write: false,
-      research: false
+      research: false,
+      canvas: false
     };
   });
   
@@ -99,12 +100,13 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       onSendMessage(message, selectedModel.id);
       setMessage('');
       
-      // Only reset search, write, and research tools, but keep saveEarth state
+      // Only reset search, write, research, and canvas tools, but keep saveEarth state
       const updatedTools = {
         ...activeTools,
         search: false,
         write: false,
-        research: false
+        research: false,
+        canvas: false
         // saveEarth remains unchanged
       };
       
@@ -370,7 +372,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                           saveEarth: !activeTools.saveEarth,
                           search: false,
                           write: false,
-                          research: false
+                          research: false,
+                          canvas: false
                         };
                         setActiveTools(updatedTools);
                         
@@ -409,7 +412,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                           saveEarth: false,
                           search: true,
                           write: false,
-                          research: false
+                          research: false,
+                          canvas: false
                         }));
                         // Focus the textarea
                         setTimeout(() => {
@@ -435,6 +439,35 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                         <path d="M12 14.5V4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       Deep research
+                    </button>
+                    
+                    <button 
+                      className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" 
+                      role="menuitem"
+                      onClick={() => {
+                        setIsToolsMenuOpen(false);
+                        setActiveTools(prev => ({
+                          ...prev,
+                          saveEarth: false,
+                          search: false,
+                          write: false,
+                          research: false,
+                          canvas: true
+                        }));
+                        // Focus the textarea
+                        setTimeout(() => {
+                          if (textareaRef.current) {
+                            textareaRef.current.focus();
+                          }
+                        }, 0);
+                      }}
+                    >
+                      <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 21L12 12M21 3L12 12M12 12L7.5 6.5M12 12L17.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16 8L18.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M8 16L5.5 18.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Canvas
                     </button>
                   </div>
                 </div>

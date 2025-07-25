@@ -59,23 +59,23 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
             <div className="mt-4 bg-white p-3 border border-gray-200 rounded shadow">
               <p className="font-semibold mb-2">💡 Energy-Efficient Prompting Tips:</p>
               <ul className="list-disc ml-5 text-sm space-y-1">
-                <li><strong>❌ Vague:</strong> "Tell me about marketing"</li>
-                <li><strong>✅ Better:</strong> "Summarize 3 trends in digital marketing for 2024"</li>
-                <li><strong>✅ Better:</strong> "Give me 3 bullet points about Gen Z brand loyalty"</li>
+                <li><strong>❌ Vague:</strong> "Tell me everything you know about digital marketing"</li>
+                <li><strong>✅ Specific:</strong> "Summarize 3 trends in digital marketing for 2024"</li>
+                <li><strong>✅ Batched:</strong> "What are the key benefits of digital marketing, how does social media influence digital marketing strategies?"</li>
               </ul>
             </div>
             <div className="mt-3 flex justify-end gap-3">
               <button 
-                onClick={() => onSustainabilityAction('reword')} 
-                className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Reword Prompt?
-              </button>
-              <button 
                 onClick={handleContinueClick} 
-                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 border border-gray-400 rounded"
               >
                 Continue
+              </button>
+              <button 
+                onClick={() => onSustainabilityAction('reword')} 
+                className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Reword Prompt?
               </button>
             </div>
           </>

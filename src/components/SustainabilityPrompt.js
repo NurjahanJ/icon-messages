@@ -84,7 +84,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
     );
   }
 
-  if (promptCount === 8 && waitingForEighthAction) {
+  if (promptCount === 6 && waitingForEighthAction) {
     return (
       <div className="sustainability-prompt bg-red-50 border-l-4 border-red-500 text-sm text-red-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">
@@ -99,9 +99,9 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
           </button>
         </div>
         
-        <div className="flex gap-4">
-          <button onClick={handleEighthYesClick} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
+        <div className="flex justify-end gap-4">
           <button onClick={handleEighthNoClick} className="px-3 py-1 border border-gray-400 rounded">No</button>
+          <button onClick={handleEighthYesClick} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
         </div>
       </div>
     );

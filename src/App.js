@@ -165,7 +165,7 @@ useEffect(() => {
         processMessage(message, modelId);
         setSustainabilityPromptShown(true);
       }
-    } else if (newPromptCount === 8 && !eighthMessagePromptShown) {
+    } else if (newPromptCount === 6 && !eighthMessagePromptShown) {
       if (isSaveEarthEnabled) {
         setPendingMessage({ message, modelId });
         setWaitingForEighthAction(true);

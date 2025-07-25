@@ -39,7 +39,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
       <div className="sustainability-prompt bg-yellow-50 border-l-4 border-green-500 text-sm text-gray-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">
           <p className="mb-2">
-            🌱 Hey, did you know this prompt would emit around <strong>4g of CO₂</strong> and use <strong>10mL of water</strong>? Would you like to learn more about energy-efficient prompting?
+            <img src="/images/leaf-svg.svg" alt="leaf" style={{ width: '16px', height: '16px', display: 'inline', marginRight: '4px' }} /> Hey, did you know this prompt could emit about <strong>0.19g of CO₂</strong> and use <strong>50mL of water</strong>? Would you like to learn about energy-efficient prompting?
           </p>
           <button 
             onClick={handleCancelClick} 
@@ -50,9 +50,9 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
         </div>
         
         {!showInfo ? (
-          <div className="flex gap-4">
-            <button onClick={handleYesClick} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
+          <div className="flex justify-end gap-4">
             <button onClick={handleNoClick} className="px-3 py-1 border border-gray-400 rounded">No</button>
+            <button onClick={handleYesClick} className="px-3 py-1 bg-green-600 text-white rounded">Yes</button>
           </div>
         ) : (
           <>

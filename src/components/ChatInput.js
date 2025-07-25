@@ -18,7 +18,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       saveEarth: false,
       search: false,
       write: false,
-      research: false
+      research: false,
+      canvas: false
     };
   });
   
@@ -99,12 +100,13 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       onSendMessage(message, selectedModel.id);
       setMessage('');
       
-      // Only reset search, write, and research tools, but keep saveEarth state
+      // Only reset search, write, research, and canvas tools, but keep saveEarth state
       const updatedTools = {
         ...activeTools,
         search: false,
         write: false,
-        research: false
+        research: false,
+        canvas: false
         // saveEarth remains unchanged
       };
       
@@ -221,7 +223,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                 <path d="M4.44893 17.009C-0.246384 7.83762 7.34051 0.686125 19.5546 3.61245C20.416 3.81881 21.0081 4.60984 20.965 5.49452C20.5862 13.288 17.0341 17.7048 6.13252 17.9857C5.43022 18.0038 4.76908 17.6344 4.44893 17.009Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M3.99999 21C5.50005 15.5 6 12.5 12 9.99997" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span className="text-sm text-green-600 font-medium">Efficient prompts save energy</span>
+              <span className="text-sm text-green-600 font-medium">Efficient prompts save energy!</span>
             </div>
             <button 
               className="ml-auto text-xs text-gray-500 hover:text-gray-700" 
@@ -370,7 +372,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                           saveEarth: !activeTools.saveEarth,
                           search: false,
                           write: false,
-                          research: false
+                          research: false,
+                          canvas: false
                         };
                         setActiveTools(updatedTools);
                         
@@ -409,7 +412,8 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                           saveEarth: false,
                           search: true,
                           write: false,
-                          research: false
+                          research: false,
+                          canvas: false
                         }));
                         // Focus the textarea
                         setTimeout(() => {
@@ -435,6 +439,35 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                         <path d="M12 14.5V4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                       Deep research
+                    </button>
+                    
+                    <button 
+                      className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 hover:bg-gray-100" 
+                      role="menuitem"
+                      onClick={() => {
+                        setIsToolsMenuOpen(false);
+                        setActiveTools(prev => ({
+                          ...prev,
+                          saveEarth: false,
+                          search: false,
+                          write: false,
+                          research: false,
+                          canvas: true
+                        }));
+                        // Focus the textarea
+                        setTimeout(() => {
+                          if (textareaRef.current) {
+                            textareaRef.current.focus();
+                          }
+                        }, 0);
+                      }}
+                    >
+                      <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 21L12 12M21 3L12 12M12 12L7.5 6.5M12 12L17.5 17.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16 8L18.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M8 16L5.5 18.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Canvas
                     </button>
                   </div>
                 </div>

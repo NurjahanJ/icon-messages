@@ -165,7 +165,7 @@ useEffect(() => {
         processMessage(message, modelId);
         setSustainabilityPromptShown(true);
       }
-    } else if (newPromptCount === 8 && !eighthMessagePromptShown) {
+    } else if (newPromptCount === 6 && !eighthMessagePromptShown) {
       if (isSaveEarthEnabled) {
         setPendingMessage({ message, modelId });
         setWaitingForEighthAction(true);
@@ -357,7 +357,7 @@ useEffect(() => {
             <div className="text-center max-w-xl mb-6">
             <h2 className="text-3xl mb-10 text-center">
             <h2 className="text-3xl text-center text-gray-900 mb-10 font-normal">
-  <button
+  Turn on <img src="/images/leaf-svg.svg" alt="leaf" style={{ width: '24px', height: '24px', display: 'inline', marginRight: '4px', marginLeft: '4px' }} /> <button
     onClick={() => {
       const current = JSON.parse(localStorage.getItem('activeTools') || '{}');
       const updated = { ...current, saveEarth: true };
@@ -366,9 +366,8 @@ useEffect(() => {
     }}
     className="text-green-600 underline hover:text-green-700 transition"
   >
-    Turn on Save the Earth Tool
-  </button>{" "}
-  to make your chat more eco-friendly.
+    Save Earth
+  </button> tool for sustainable and eco-friendly chats.
 </h2>
 
 

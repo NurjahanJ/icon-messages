@@ -163,6 +163,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                   handleSubmit(e);
                 }
               }}
+              placeholder="Ask anything"
               disabled={disabled || hasReachedLimit}
               className="w-full resize-none bg-transparent border-0 focus:ring-0 focus:outline-none text-gray-900 p-0 m-0"
               rows="1"

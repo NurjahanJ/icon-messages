@@ -12,7 +12,6 @@ import {
   FaMicrophone,
   FaMicrophoneSlash,
   FaPaperPlane,
-  FaPlus,
 } from 'react-icons/fa';
 import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 

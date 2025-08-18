@@ -64,6 +64,21 @@ useEffect(() => {
 
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
+    
+    // Check if the message is the special keyword to display user ID
+    if (message.trim().toUpperCase() === 'GREENERAI') {
+      // Create user message object
+      const userMessage = createUserMessage(message);
+      userMessage.timestamp = new Date().toISOString();
+      
+      // Create response with user ID
+      const userIdResponse = createAssistantMessage(`Your User ID is: ${userId || 'Not available'}`);
+      userIdResponse.timestamp = new Date().toISOString();
+      
+      // Update messages with both the user message and the response
+      setMessages([...messages, userMessage, userIdResponse]);
+      return; // Exit early, don't process further
+    }
 
     // Create user message object
     const userMessage = createUserMessage(message);

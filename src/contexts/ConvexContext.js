@@ -2,7 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { useMutation } from 'convex/react';
 import { nanoid } from 'nanoid';
-import { api } from '../../convex/_generated/api';
+// Import API from a path that will be accessible after build
+import { api } from '../api/convexApi';
 
 // Create context for user ID
 const UserContext = createContext();

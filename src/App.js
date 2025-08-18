@@ -202,7 +202,7 @@ useEffect(() => {
   
   
   // Handle user interaction with the sustainability prompt
-  const handleSustainabilityAction = (action) => {
+  const handleSustainabilityAction = (action, userId = null) => {
     // Handle 3rd message sustainability prompt actions
     if (pendingMessage && waitingForSustainabilityAction) {
       if (action === 'no' || action === 'cancel') {
@@ -245,10 +245,11 @@ useEffect(() => {
         processMessage(pendingMessage.message, pendingMessage.modelId);
         setWaitingForEighthAction(false);
       } else if (action === 'eighth-yes') {
-        // If user clicks Yes, show a thank you message and don't process the message
+        // If user clicks Yes, show a thank you message with user ID and don't process the message
         if (messages.length > 0) {
-          // Create a thank you message
-          const thankYouMessage = createAssistantMessage("Thanks for taking a break!");
+          // Create a thank you message with user ID
+          const userIdMessage = userId ? `\n\nYour User ID is: ${userId}` : '';
+          const thankYouMessage = createAssistantMessage(`Thanks for taking a break! ${userIdMessage}`);
           thankYouMessage.timestamp = new Date().toISOString();
           
           // Update the messages with the thank you message
@@ -419,6 +420,7 @@ useEffect(() => {
     onSustainabilityAction={handleSustainabilityAction}
     waitingForAction={waitingForSustainabilityAction}
     waitingForEighthAction={waitingForEighthAction}
+    userId={userId}
   />
 )}
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />

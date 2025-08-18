@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForAction = false, waitingForEighthAction = false }) => {
+const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForAction = false, waitingForEighthAction = false, userId }) => {
   const [showInfo, setShowInfo] = useState(false);
 
   // Handle user clicking Yes button
@@ -21,7 +21,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
   
   // Handle 8th message Yes button
   const handleEighthYesClick = () => {
-    onSustainabilityAction('eighth-yes');
+    onSustainabilityAction('eighth-yes', userId);
   };
   
   // Handle 8th message No button

@@ -5,8 +5,10 @@ import ChatInput from './components/ChatInput';
 import Header from './components/Header';
 import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
+import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
+import { useStoreConversation } from './services/convexService';
 
-function App() {
+function AppContent() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,6 +19,8 @@ function App() {
   const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const { userId } = useUser();
+  const storeConversation = useStoreConversation();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(() => {
     
     if (typeof window !== 'undefined') {
@@ -109,6 +113,16 @@ useEffect(() => {
       setMessages(isMessageAlreadyAdded 
         ? [...messages, assistantMessage]
         : [...messages, userMessage, assistantMessage]);
+        
+      // Store conversation in Convex if user is authenticated
+      if (userId) {
+        try {
+          await storeConversation(message, assistantContent);
+          console.log('Conversation stored in Convex');
+        } catch (error) {
+          console.error('Failed to store conversation in Convex:', error);
+        }
+      }
     } catch (err) {
       console.error('Error details in App.js:', {
         message: err.message,
@@ -410,6 +424,14 @@ useEffect(() => {
         )}
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ConvexProviderWrapper>
+      <AppContent />
+    </ConvexProviderWrapper>
   );
 }
 

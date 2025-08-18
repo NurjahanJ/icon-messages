@@ -21,21 +21,8 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
-  const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(() => {
-    
-    if (typeof window !== 'undefined') {
-      const tools = localStorage.getItem('activeTools');
-      if (tools) {
-        try {
-          return JSON.parse(tools).saveEarth === true;
-        } catch {
-          return false;
-        }
-      }
-    }
-    return false;
-  });
-  
+  const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -391,7 +378,9 @@ useEffect(() => {
       const current = JSON.parse(localStorage.getItem('activeTools') || '{}');
       const updated = { ...current, saveEarth: true };
       localStorage.setItem('activeTools', JSON.stringify(updated));
-      window.location.reload();
+      setIsSaveEarthEnabled(true);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('localStorageUpdated'));
     }}
     className="text-green-600 underline hover:text-green-700 transition"
   >

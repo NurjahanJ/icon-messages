@@ -20,7 +20,10 @@ const ChatInput = ({ onSendMessage, disabled }) => {
   const [activeTools, setActiveTools] = useState(() => {
     if (typeof window !== 'undefined') {
       const savedState = localStorage.getItem('activeTools');
-      if (savedState) return JSON.parse(savedState);
+      if (savedState) {
+        const parsed = JSON.parse(savedState);
+        return parsed;
+      }
     }
     return {
       saveEarth: false,
@@ -34,6 +37,36 @@ const ChatInput = ({ onSendMessage, disabled }) => {
   useEffect(() => {
     localStorage.setItem('activeTools', JSON.stringify(activeTools));
   }, [activeTools]);
+
+  // Listen for localStorage changes from other components
+  useEffect(() => {
+    const checkLocalStorage = () => {
+      const savedState = localStorage.getItem('activeTools');
+      if (savedState) {
+        try {
+          const parsed = JSON.parse(savedState);
+          setActiveTools(parsed);
+        } catch (error) {
+          console.error('Error parsing activeTools from localStorage', error);
+        }
+      }
+    };
+    
+    // Check on mount
+    checkLocalStorage();
+    
+    // Set up event listener for storage changes
+    window.addEventListener('storage', checkLocalStorage);
+    
+    // Custom event for same-tab updates
+    const handleCustomStorageEvent = () => checkLocalStorage();
+    window.addEventListener('localStorageUpdated', handleCustomStorageEvent);
+    
+    return () => {
+      window.removeEventListener('storage', checkLocalStorage);
+      window.removeEventListener('localStorageUpdated', handleCustomStorageEvent);
+    };
+  }, []);
 
   const [isListening, setIsListening] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);

@@ -5,8 +5,10 @@ import ChatInput from './components/ChatInput';
 import Header from './components/Header';
 import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
+import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
+import { useStoreConversation } from './services/convexService';
 
-function App() {
+function AppContent() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -17,21 +19,10 @@ function App() {
   const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
-  const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(() => {
-    
-    if (typeof window !== 'undefined') {
-      const tools = localStorage.getItem('activeTools');
-      if (tools) {
-        try {
-          return JSON.parse(tools).saveEarth === true;
-        } catch {
-          return false;
-        }
-      }
-    }
-    return false;
-  });
-  
+  const { userId } = useUser();
+  const storeConversation = useStoreConversation();
+  const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -60,6 +51,21 @@ useEffect(() => {
 
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
+    
+    // Check if the message is the special keyword to display user ID
+    if (message.trim().toUpperCase() === 'GREENERAI') {
+      // Create user message object
+      const userMessage = createUserMessage(message);
+      userMessage.timestamp = new Date().toISOString();
+      
+      // Create response with user ID
+      const userIdResponse = createAssistantMessage(`Your User ID is: ${userId || 'Not available'}`);
+      userIdResponse.timestamp = new Date().toISOString();
+      
+      // Update messages with both the user message and the response
+      setMessages([...messages, userMessage, userIdResponse]);
+      return; // Exit early, don't process further
+    }
 
     // Create user message object
     const userMessage = createUserMessage(message);
@@ -109,6 +115,16 @@ useEffect(() => {
       setMessages(isMessageAlreadyAdded 
         ? [...messages, assistantMessage]
         : [...messages, userMessage, assistantMessage]);
+        
+      // Store conversation in Convex if user is authenticated
+      if (userId) {
+        try {
+          await storeConversation(message, assistantContent);
+          console.log('Conversation stored in Convex');
+        } catch (error) {
+          console.error('Failed to store conversation in Convex:', error);
+        }
+      }
     } catch (err) {
       console.error('Error details in App.js:', {
         message: err.message,
@@ -186,7 +202,7 @@ useEffect(() => {
   
   
   // Handle user interaction with the sustainability prompt
-  const handleSustainabilityAction = (action) => {
+  const handleSustainabilityAction = (action, userId = null) => {
     // Handle 3rd message sustainability prompt actions
     if (pendingMessage && waitingForSustainabilityAction) {
       if (action === 'no' || action === 'cancel') {
@@ -229,10 +245,11 @@ useEffect(() => {
         processMessage(pendingMessage.message, pendingMessage.modelId);
         setWaitingForEighthAction(false);
       } else if (action === 'eighth-yes') {
-        // If user clicks Yes, show a thank you message and don't process the message
+        // If user clicks Yes, show a thank you message with user ID and don't process the message
         if (messages.length > 0) {
-          // Create a thank you message
-          const thankYouMessage = createAssistantMessage("Thanks for taking a break!");
+          // Create a thank you message with user ID
+          const userIdMessage = userId ? `\n\nYour User ID is: ${userId}` : '';
+          const thankYouMessage = createAssistantMessage(`Thanks for taking a break! ${userIdMessage}`);
           thankYouMessage.timestamp = new Date().toISOString();
           
           // Update the messages with the thank you message
@@ -362,7 +379,9 @@ useEffect(() => {
       const current = JSON.parse(localStorage.getItem('activeTools') || '{}');
       const updated = { ...current, saveEarth: true };
       localStorage.setItem('activeTools', JSON.stringify(updated));
-      window.location.reload();
+      setIsSaveEarthEnabled(true);
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new Event('localStorageUpdated'));
     }}
     className="text-green-600 underline hover:text-green-700 transition"
   >
@@ -401,6 +420,7 @@ useEffect(() => {
     onSustainabilityAction={handleSustainabilityAction}
     waitingForAction={waitingForSustainabilityAction}
     waitingForEighthAction={waitingForEighthAction}
+    userId={userId}
   />
 )}
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
@@ -410,6 +430,14 @@ useEffect(() => {
         )}
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <ConvexProviderWrapper>
+      <AppContent />
+    </ConvexProviderWrapper>
   );
 }
 

@@ -19,12 +19,16 @@ const MessageBubble = ({ message }) => {
     }
   };
 
-  // Only use special styling for errors, otherwise keep original styling
+  // Only use special styling for errors or eco-feedback messages, otherwise keep original styling
+  const isEcoFeedbackMessage = message.content && message.content.includes('Good decision about rewording your prompt!');
+  
   const bubbleClass = message.role === 'user' 
     ? 'bg-blue-600 text-white self-end' 
     : message.isError 
       ? 'bg-red-100 text-red-800 self-start border border-red-300' 
-      : 'bg-gray-100 text-gray-800 self-start';
+      : isEcoFeedbackMessage
+        ? 'bg-green-50 text-green-800 self-start border border-green-100'
+        : 'bg-gray-100 text-gray-800 self-start';
 
   return (
     <div className={`flex w-full my-4 ${isUser ? 'justify-end' : 'justify-start'}`}>

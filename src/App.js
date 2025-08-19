@@ -223,7 +223,12 @@ useEffect(() => {
         if (messages.length > 0) {
           // Remove the last message (which is the third prompt)
           const newMessages = messages.slice(0, -1);
-          setMessages(newMessages);
+          
+          // Add feedback message for rewording
+          const feedbackMessage = createAssistantMessage("Good decision about rewording your prompt! Specific, concise, and combined prompts saves energy. Your efforts to promote eco-friendly practices are truly inspiring.");
+          feedbackMessage.timestamp = new Date().toISOString();
+          
+          setMessages([...newMessages, feedbackMessage]);
           
           // Reset the prompt count to 2 so the next message will be the third prompt again
           setPromptCount(2);

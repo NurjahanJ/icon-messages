@@ -61,7 +61,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
               <ul className="list-disc ml-5 text-sm space-y-1">
                 <li><strong>❌ Vague:</strong> "Tell me everything you know about digital marketing"</li>
                 <li><strong>✅ Specific:</strong> "Summarize 3 trends in digital marketing for 2024"</li>
-                <li><strong>✅ Batched:</strong> "What are the key benefits of digital marketing, how does social media influence digital marketing strategies?"</li>
+                <li><strong>✅ Combined:</strong> "What are the key benefits of digital marketing, and how does social media influence digital marketing strategies?"</li>
               </ul>
             </div>
             <div className="mt-3 flex justify-end gap-3">

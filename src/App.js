@@ -319,9 +319,7 @@ useEffect(() => {
           // First process the user's message to get a response
           const processUserMessage = async () => {
             try {
-              // Create user message object (should already be added to messages)
-              const userMessage = createUserMessage(pendingMessage.message);
-              
+              // User message should already be added to messages
               // Create loading message
               const loadingMessage = {
                 role: 'assistant',

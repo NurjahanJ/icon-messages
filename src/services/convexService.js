@@ -60,115 +60,32 @@ export const useGetAllConversations = () => {
   return useQuery(api.conversations.getAllConversations);
 };
 
-// Store user's choice for the sustainability prompt (yes/no)
+// Empty placeholder functions for sustainability interactions
+// These functions will just log to console but not actually store data
 export const useStoreSustainabilityChoice = () => {
-  const storeSustainabilityChoiceMutation = useMutation(api.messages.storeSustainabilityChoice);
-  
   return async (choice) => {
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
-        return null;
-      }
-      
-      const messageId = await storeSustainabilityChoiceMutation({
-        userId,
-        choice,
-      });
-      
-      return messageId;
-    } catch (error) {
-      console.error('Error storing sustainability choice:', error);
-      return null;
-    }
+    console.log('Sustainability choice (not stored):', choice);
+    return null;
   };
 };
 
-// Store user's choice for reword/continue prompt
 export const useStoreRewordChoice = () => {
-  const storeRewordChoiceMutation = useMutation(api.messages.storeRewordChoice);
-  
-  return async (choice, originalPrompt = null) => {
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
-        return null;
-      }
-      
-      const messageId = await storeRewordChoiceMutation({
-        userId,
-        choice,
-        originalPrompt,
-      });
-      
-      return messageId;
-    } catch (error) {
-      console.error('Error storing reword choice:', error);
-      return null;
-    }
-  };
-};
-
-// Store reworded prompt
-export const useStoreRewordedPrompt = () => {
-  const storeRewordedPromptMutation = useMutation(api.messages.storeRewordedPrompt);
-  
-  return async (rewordedPrompt, messageId = null) => {
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
-        return null;
-      }
-      
-      const newMessageId = await storeRewordedPromptMutation({
-        userId,
-        rewordedPrompt,
-        messageId,
-      });
-      
-      return newMessageId;
-    } catch (error) {
-      console.error('Error storing reworded prompt:', error);
-      return null;
-    }
-  };
-};
-
-// Store user's choice for break message (continue/break)
-export const useStoreBreakChoice = () => {
-  const storeBreakChoiceMutation = useMutation(api.messages.storeBreakChoice);
-  
   return async (choice) => {
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
-        return null;
-      }
-      
-      const messageId = await storeBreakChoiceMutation({
-        userId,
-        choice,
-      });
-      
-      return messageId;
-    } catch (error) {
-      console.error('Error storing break choice:', error);
-      return null;
-    }
+    console.log('Reword choice (not stored):', choice);
+    return null;
   };
 };
 
-// Get messages for the current user
-export const useGetUserMessages = () => {
-  const userId = localStorage.getItem('userId');
-  return useQuery(api.messages.getUserMessages, { userId });
+export const useStoreRewordedPrompt = () => {
+  return async () => {
+    console.log('Reworded prompt (not stored)');
+    return null;
+  };
 };
 
-// Get all messages (admin function)
-export const useGetAllMessages = () => {
-  return useQuery(api.messages.getAllMessages);
+export const useStoreBreakChoice = () => {
+  return async (choice) => {
+    console.log('Break choice (not stored):', choice);
+    return null;
+  };
 };

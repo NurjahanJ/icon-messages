@@ -7,11 +7,7 @@ import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
 import { 
-  useStoreConversation, 
-  useStoreSustainabilityChoice, 
-  useStoreRewordChoice, 
-  useStoreRewordedPrompt, 
-  useStoreBreakChoice 
+  useStoreConversation 
 } from './services/convexService';
 
 function AppContent() {
@@ -27,10 +23,6 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
-  const storeSustainabilityChoice = useStoreSustainabilityChoice();
-  const storeRewordChoice = useStoreRewordChoice();
-  const storeRewordedPrompt = useStoreRewordedPrompt();
-  const storeBreakChoice = useStoreBreakChoice();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
   const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
 
@@ -63,17 +55,11 @@ useEffect(() => {
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
     
-    // If this is a reworded prompt (after the user clicked reword), store it
+    // If this is a reworded prompt (after the user clicked reword), reset the lastRewordMessageId
     if (promptCount === 3 && lastRewordMessageId) {
-      // Store the reworded prompt in the messages table
-      storeRewordedPrompt(message, lastRewordMessageId)
-        .then(() => {
-          console.log('Reworded prompt stored');
-          setLastRewordMessageId(null); // Reset after storing
-        })
-        .catch(error => {
-          console.error('Failed to store reworded prompt:', error);
-        });
+      // No longer storing the reworded prompt, just reset the state
+      console.log('Processing reworded prompt');
+      setLastRewordMessageId(null); // Reset after processing
     }
     
     // Check if the message is the special keyword to display user ID
@@ -260,14 +246,8 @@ useEffect(() => {
         // We'll wait for explicit user interaction with the Continue button
         // The Continue button is added in the SustainabilityPrompt component
       } else if (action === 'continue') {
-        // Track user's choice for continue
-        storeRewordChoice('continue')
-          .then(messageId => {
-            console.log('Continue choice stored');
-          })
-          .catch(error => {
-            console.error('Failed to store continue choice:', error);
-          });
+        // Log user's choice for continue (no longer storing in database)
+        console.log('User chose to continue with original prompt');
         
         // Process the message when the user explicitly clicks Continue
         if (pendingMessage) {
@@ -287,15 +267,10 @@ useEffect(() => {
               storeConversation(originalPrompt, "[Original prompt before rewording]");
               console.log('Original 3rd prompt stored in Convex');
               
-              // Store the reword choice and original prompt in the messages table
-              storeRewordChoice('reword', originalPrompt)
-                .then(messageId => {
-                  console.log('Reword choice and original prompt stored');
-                  setLastRewordMessageId(messageId); // Save message ID for later updating with reworded prompt
-                })
-                .catch(error => {
-                  console.error('Failed to store reword choice:', error);
-                });
+              // Log user's choice to reword (no longer storing in database)
+              console.log('User chose to reword their prompt');
+              // Use a dummy ID for tracking
+              setLastRewordMessageId('reword-' + Date.now());
             } catch (error) {
               console.error('Failed to store original prompt in Convex:', error);
             }
@@ -327,15 +302,9 @@ useEffect(() => {
     if (pendingMessage && waitingForEighthAction) {
       // Track user's choice for the break message prompt
       if (action === 'eighth-no' || action === 'eighth-yes') {
-        // Store the user's choice in the messages table
+        // Log the user's choice (no longer storing in database)
         const breakChoice = action === 'eighth-no' ? 'continue' : 'break';
-        storeBreakChoice(breakChoice)
-          .then(messageId => {
-            console.log('Break choice stored:', breakChoice);
-          })
-          .catch(error => {
-            console.error('Failed to store break choice:', error);
-          });
+        console.log('User break choice:', breakChoice);
       }
       
       if (action === 'eighth-no') {

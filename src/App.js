@@ -221,6 +221,20 @@ useEffect(() => {
         // If user clicks Reword Prompt, remove the last message and reset the prompt count
         // This allows the user to rewrite their third prompt
         if (messages.length > 0) {
+          // Get the original 3rd prompt before removing it from UI
+          const originalPrompt = messages[messages.length - 1].content;
+          
+          // Store the original prompt in Convex with a special flag
+          if (userId) {
+            try {
+              // Store the original 3rd prompt in Convex with a placeholder response
+              storeConversation(originalPrompt, "[Original prompt before rewording]");
+              console.log('Original 3rd prompt stored in Convex');
+            } catch (error) {
+              console.error('Failed to store original prompt in Convex:', error);
+            }
+          }
+          
           // Remove the last message (which is the third prompt)
           const newMessages = messages.slice(0, -1);
           
@@ -230,8 +244,8 @@ useEffect(() => {
           
           setMessages([...newMessages, feedbackMessage]);
           
-          // Reset the prompt count to 2 so the next message will be the third prompt again
-          setPromptCount(2);
+          // Don't reset the prompt count - keep the original prompt as #3 and make the reworded prompt #4
+          // The original prompt count is already 3 at this point, so we don't need to change it
           
           // Clear the pending message
           setPendingMessage(null);

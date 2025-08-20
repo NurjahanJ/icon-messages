@@ -13,5 +13,13 @@ export const api = {
     storeConversation: "conversations:storeConversation",
     getUserConversations: "conversations:getUserConversations",
     getAllConversations: "conversations:getAllConversations"
+  },
+  messages: {
+    storeSustainabilityChoice: "messages:storeSustainabilityChoice",
+    storeRewordChoice: "messages:storeRewordChoice",
+    storeRewordedPrompt: "messages:storeRewordedPrompt",
+    storeBreakChoice: "messages:storeBreakChoice",
+    getUserMessages: "messages:getUserMessages",
+    getAllMessages: "messages:getAllMessages"
   }
 };

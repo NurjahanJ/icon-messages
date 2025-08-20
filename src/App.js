@@ -6,7 +6,13 @@ import Header from './components/Header';
 import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
-import { useStoreConversation } from './services/convexService';
+import { 
+  useStoreConversation, 
+  useStoreSustainabilityChoice, 
+  useStoreRewordChoice, 
+  useStoreRewordedPrompt, 
+  useStoreBreakChoice 
+} from './services/convexService';
 
 function AppContent() {
   const [messages, setMessages] = useState([]);
@@ -21,7 +27,12 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
+  const storeSustainabilityChoice = useStoreSustainabilityChoice();
+  const storeRewordChoice = useStoreRewordChoice();
+  const storeRewordedPrompt = useStoreRewordedPrompt();
+  const storeBreakChoice = useStoreBreakChoice();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
+  const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
 
   useEffect(() => {
     scrollToBottom();
@@ -52,6 +63,19 @@ useEffect(() => {
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
     
+    // If this is a reworded prompt (after the user clicked reword), store it
+    if (promptCount === 3 && lastRewordMessageId) {
+      // Store the reworded prompt in the messages table
+      storeRewordedPrompt(message, lastRewordMessageId)
+        .then(() => {
+          console.log('Reworded prompt stored');
+          setLastRewordMessageId(null); // Reset after storing
+        })
+        .catch(error => {
+          console.error('Failed to store reworded prompt:', error);
+        });
+    }
+    
     // Check if the message is the special keyword to display user ID
     if (message.trim().toUpperCase() === 'GREENERAI') {
       // Create user message object
@@ -64,7 +88,18 @@ useEffect(() => {
       
       // Update messages with both the user message and the response
       setMessages([...messages, userMessage, userIdResponse]);
-      return; // Exit early, don't process further
+      
+      // Store conversation in Convex if user is authenticated
+      if (userId) {
+        try {
+          storeConversation(message, `Your User ID is: ${userId || 'Not available'}`);
+          console.log('GREENERAI message stored in Convex');
+        } catch (error) {
+          console.error('Failed to store GREENERAI message in Convex:', error);
+        }
+      }
+      
+      return; // Exit after storing the conversation
     }
 
     // Create user message object
@@ -205,6 +240,18 @@ useEffect(() => {
   const handleSustainabilityAction = (action, userId = null) => {
     // Handle 3rd message sustainability prompt actions
     if (pendingMessage && waitingForSustainabilityAction) {
+      // Track user's choice for the sustainability prompt (yes/no)
+      if (action === 'no' || action === 'cancel' || action === 'yes') {
+        // Store the user's choice in the messages table
+        storeSustainabilityChoice(action)
+          .then(messageId => {
+            console.log('Sustainability choice stored:', action);
+          })
+          .catch(error => {
+            console.error('Failed to store sustainability choice:', error);
+          });
+      }
+      
       if (action === 'no' || action === 'cancel') {
         // If user clicks No or Cancel, process the message normally
         processMessage(pendingMessage.message, pendingMessage.modelId);
@@ -213,6 +260,15 @@ useEffect(() => {
         // We'll wait for explicit user interaction with the Continue button
         // The Continue button is added in the SustainabilityPrompt component
       } else if (action === 'continue') {
+        // Track user's choice for continue
+        storeRewordChoice('continue')
+          .then(messageId => {
+            console.log('Continue choice stored');
+          })
+          .catch(error => {
+            console.error('Failed to store continue choice:', error);
+          });
+        
         // Process the message when the user explicitly clicks Continue
         if (pendingMessage) {
           processMessage(pendingMessage.message, pendingMessage.modelId);
@@ -230,6 +286,16 @@ useEffect(() => {
               // Store the original 3rd prompt in Convex with a placeholder response
               storeConversation(originalPrompt, "[Original prompt before rewording]");
               console.log('Original 3rd prompt stored in Convex');
+              
+              // Store the reword choice and original prompt in the messages table
+              storeRewordChoice('reword', originalPrompt)
+                .then(messageId => {
+                  console.log('Reword choice and original prompt stored');
+                  setLastRewordMessageId(messageId); // Save message ID for later updating with reworded prompt
+                })
+                .catch(error => {
+                  console.error('Failed to store reword choice:', error);
+                });
             } catch (error) {
               console.error('Failed to store original prompt in Convex:', error);
             }
@@ -259,6 +325,19 @@ useEffect(() => {
     
     // Handle 8th message sustainability prompt actions
     if (pendingMessage && waitingForEighthAction) {
+      // Track user's choice for the break message prompt
+      if (action === 'eighth-no' || action === 'eighth-yes') {
+        // Store the user's choice in the messages table
+        const breakChoice = action === 'eighth-no' ? 'continue' : 'break';
+        storeBreakChoice(breakChoice)
+          .then(messageId => {
+            console.log('Break choice stored:', breakChoice);
+          })
+          .catch(error => {
+            console.error('Failed to store break choice:', error);
+          });
+      }
+      
       if (action === 'eighth-no') {
         // If user clicks No, process the message normally
         processMessage(pendingMessage.message, pendingMessage.modelId);
@@ -489,7 +568,6 @@ useEffect(() => {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="text-center max-w-xl mb-6">
-            <h2 className="text-3xl mb-10 text-center">
             <h2 className="text-3xl text-center text-gray-900 mb-10 font-normal">
   Turn on <img src="/images/leaf-svg.svg" alt="leaf" style={{ width: '24px', height: '24px', display: 'inline', marginRight: '4px', marginLeft: '4px' }} /> <button
     onClick={() => {
@@ -504,10 +582,6 @@ useEffect(() => {
   >
     Save Earth
   </button> tool for sustainable and eco-friendly chats.
-</h2>
-
-
-
 </h2>
              
             </div>

@@ -264,19 +264,117 @@ useEffect(() => {
         processMessage(pendingMessage.message, pendingMessage.modelId);
         setWaitingForEighthAction(false);
       } else if (action === 'eighth-yes') {
-        // If user clicks Yes, show a thank you message with user ID and don't process the message
-        if (messages.length > 0) {
-          // Create a thank you message with user ID
-          const userIdMessage = userId ? `\n\nYour User ID is: ${userId}` : '';
-          const thankYouMessage = createAssistantMessage(`Thanks for taking a break! ${userIdMessage}`);
-          thankYouMessage.timestamp = new Date().toISOString();
+        // If user clicks Yes, first process their message and then show a thank you message
+        if (messages.length > 0 && pendingMessage) {
+          // First process the user's message to get a response
+          const processUserMessage = async () => {
+            try {
+              // Create user message object (should already be added to messages)
+              const userMessage = createUserMessage(pendingMessage.message);
+              
+              // Create loading message
+              const loadingMessage = {
+                role: 'assistant',
+                content: '',
+                isLoading: true,
+                timestamp: new Date().toISOString(),
+              };
+              
+              // Add loading message
+              setMessages(prevMessages => [...prevMessages, loadingMessage]);
+              setLoading(true);
+              
+              // Send the message to get a response
+              const messagesToSend = [...messages];
+              const response = await sendConversation(messagesToSend, pendingMessage.modelId);
+              
+              // Get the assistant's response
+              const assistantContent = response.choices?.[0]?.message?.content || 
+                "I apologize, but I couldn't generate a response.";
+              const assistantMessage = createAssistantMessage(assistantContent);
+              assistantMessage.timestamp = new Date().toISOString();
+              
+              // Update messages with the assistant's response
+              setMessages(prevMessages => {
+                // Remove loading message
+                const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+                return [...filteredMessages, assistantMessage];
+              });
+              
+              // Store conversation in Convex if user is authenticated
+              if (userId) {
+                try {
+                  await storeConversation(pendingMessage.message, assistantContent);
+                  console.log('Conversation stored in Convex');
+                } catch (error) {
+                  console.error('Failed to store conversation in Convex:', error);
+                }
+              }
+              
+              // After processing the message, add the thank you message
+              setTimeout(() => {
+                // Check if the last message contains 'GREENERAI' to show user ID
+                const lastMessage = messages[messages.length - 1];
+                const showUserId = lastMessage && lastMessage.role === 'user' && 
+                                  lastMessage.content && lastMessage.content.toUpperCase().includes('GREENERAI');
+                
+                // Only include user ID if GREENERAI was typed
+                const userIdMessage = showUserId && userId ? `\n\nYour User ID is: ${userId}` : '';
+                
+                // New thank you message with sustainability focus
+                const thankYouMessage = createAssistantMessage(`Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.${userIdMessage}`);
+                thankYouMessage.timestamp = new Date().toISOString();
+                
+                // Add a flag to identify this as a break message for styling
+                thankYouMessage.isBreakMessage = true;
+                
+                // Update the messages with the thank you message
+                setMessages(prevMessages => [...prevMessages, thankYouMessage]);
+                
+                // Clear the pending message and reset waiting state
+                setPendingMessage(null);
+                setWaitingForEighthAction(false);
+                setLoading(false);
+              }, 1000); // Add a small delay between the response and thank you message
+              
+            } catch (err) {
+              console.error('Error processing message:', err);
+              
+              // Handle error case
+              let errorContent = "Sorry, something went wrong.";
+              if (err.message.includes('timeout')) {
+                errorContent = "The request timed out. Please try again later.";
+              } else if (err.message.includes('rate limit')) {
+                errorContent = "Rate limit exceeded. Please try again in a few moments.";
+              }
+              
+              const errorMessage = createAssistantMessage(errorContent);
+              errorMessage.timestamp = new Date().toISOString();
+              errorMessage.isError = true;
+              
+              // Update messages with error
+              setMessages(prevMessages => {
+                // Remove loading message
+                const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+                return [...filteredMessages, errorMessage];
+              });
+              
+              // Still show thank you message after error
+              setTimeout(() => {
+                const thankYouMessage = createAssistantMessage("Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.");
+                thankYouMessage.timestamp = new Date().toISOString();
+                thankYouMessage.isBreakMessage = true;
+                
+                setMessages(prevMessages => [...prevMessages, thankYouMessage]);
+                setPendingMessage(null);
+                setWaitingForEighthAction(false);
+                setLoading(false);
+              }, 1000);
+            }
+          };
           
-          // Update the messages with the thank you message
-          setMessages([...messages, thankYouMessage]);
-          
-          // Clear the pending message and reset waiting state
-          setPendingMessage(null);
-          setWaitingForEighthAction(false);
+          // Start processing the message
+          processUserMessage();
         }
       }
     }

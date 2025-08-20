@@ -19,14 +19,15 @@ const MessageBubble = ({ message }) => {
     }
   };
 
-  // Only use special styling for errors or eco-feedback messages, otherwise keep original styling
+  // Special styling for different message types
   const isEcoFeedbackMessage = message.content && message.content.includes('Good decision about rewording your prompt!');
+  const isBreakMessage = message.isBreakMessage || (message.content && message.content.includes('I really admire how committed you are to reducing data waste'));
   
   const bubbleClass = message.role === 'user' 
     ? 'bg-blue-600 text-white self-end' 
     : message.isError 
       ? 'bg-red-100 text-red-800 self-start border border-red-300' 
-      : isEcoFeedbackMessage
+      : isEcoFeedbackMessage || isBreakMessage
         ? 'bg-green-50 text-green-800 self-start border border-green-100'
         : 'bg-gray-100 text-gray-800 self-start';
 

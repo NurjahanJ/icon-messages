@@ -7,7 +7,8 @@ import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
 import { 
-  useStoreConversation 
+  useStoreConversation,
+  useStoreSustainabilityChoice
 } from './services/convexService';
 
 function AppContent() {
@@ -23,6 +24,7 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
+  const storeSustainabilityChoice = useStoreSustainabilityChoice();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
   const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
 

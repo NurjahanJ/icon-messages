@@ -66,7 +66,6 @@ export const useGetAllConversations = () => {
 // Store sustainability info prompt interaction (first prompt)
 export const useStoreSustainabilityChoice = () => {
   const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
-  console.log('DEBUG: Sustainability choice mutation initialized');
   
   return async (choice) => {
     try {
@@ -76,16 +75,11 @@ export const useStoreSustainabilityChoice = () => {
         return null;
       }
       
-      console.log('DEBUG: About to store sustainability choice with params:', {
-        userId,
-        interactionType: 'info_prompt',
-        userChoice: choice
-      });
-      
       const interactionId = await storeSustainabilityInteractionMutation({
         userId,
         interactionType: 'info_prompt',
         userChoice: choice, // 'yes' or 'no'
+        timestamp: Date.now(),
       });
       
       console.log('Sustainability choice stored:', choice);
@@ -110,16 +104,11 @@ export const useStoreRewordChoice = () => {
         return null;
       }
       
-      console.log('DEBUG: About to store reword choice with params:', {
-        userId,
-        interactionType: 'rewrite_prompt',
-        userChoice: choice
-      });
-      
       const interactionId = await storeSustainabilityInteractionMutation({
         userId,
         interactionType: 'rewrite_prompt',
         userChoice: choice, // 'continue' or 'rewrite'
+        timestamp: Date.now(),
       });
       
       console.log('Reword choice stored:', choice);
@@ -144,14 +133,6 @@ export const useStoreRewordedPrompt = () => {
         return null;
       }
       
-      console.log('DEBUG: About to store reworded prompt with params:', {
-        userId,
-        interactionType: 'rewritten_content',
-        userChoice: 'rewrite',
-        originalPrompt,
-        rewrittenPrompt: rewrittenPrompt.substring(0, 50) + '...' // Log truncated for brevity
-      });
-      
       const interactionId = await storeSustainabilityInteractionMutation({
         userId,
         interactionType: 'rewritten_content',
@@ -159,6 +140,7 @@ export const useStoreRewordedPrompt = () => {
         originalPrompt,
         rewrittenPrompt,
         rewrittenResponse,
+        timestamp: Date.now(),
       });
       
       console.log('Reworded prompt stored');
@@ -183,16 +165,11 @@ export const useStoreBreakChoice = () => {
         return null;
       }
       
-      console.log('DEBUG: About to store break choice with params:', {
-        userId,
-        interactionType: 'break_prompt',
-        userChoice: choice
-      });
-      
       const interactionId = await storeSustainabilityInteractionMutation({
         userId,
         interactionType: 'break_prompt',
         userChoice: choice, // 'continue' or 'take_break'
+        timestamp: Date.now(),
       });
       
       console.log('Break choice stored:', choice);

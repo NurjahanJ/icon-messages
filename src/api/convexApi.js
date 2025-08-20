@@ -14,6 +14,8 @@ export const api = {
     getUserConversations: "conversations:getUserConversations",
     getAllConversations: "conversations:getAllConversations"
   },
+  // Keeping sustainability API endpoints as empty functions to prevent errors
+  // These will be handled by placeholder functions in the backend
   sustainability: {
     storeSustainabilityInteraction: "sustainability:storeSustainabilityInteraction",
     getUserSustainabilityInteractions: "sustainability:getUserSustainabilityInteractions",

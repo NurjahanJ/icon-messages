@@ -1,0 +1,18 @@
+# Environment Variables Setup Instructions
+
+To fix the blank screen issue, you need to create a `.env` file in the root directory of your project with the following content:
+
+```
+REACT_APP_CONVEX_URL=https://dynamic-mole-123.convex.cloud
+```
+
+This URL was found in your convex.json file and is required for the application to connect to your Convex database.
+
+## Steps to create the .env file:
+
+1. Create a new file named `.env` (including the dot) in the root directory of your project
+2. Add the line above to the file
+3. Save the file
+4. Restart the application using `npm start`
+
+The application should now load properly with the Convex connection established.

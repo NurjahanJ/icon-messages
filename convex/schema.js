@@ -15,15 +15,6 @@ export default defineSchema({
     prompt: v.string(),
     response: v.string(),
   }),
-
-  // Table to track sustainability interactions
-  sustainability_interactions: defineTable({
-    userId: v.string(), // User ID
-    interactionType: v.string(), // Type of interaction: "info_prompt", "rewrite_prompt", "break_prompt"
-    userChoice: v.string(), // User's choice: "yes", "no", "continue", "rewrite", "take_break"
-    originalPrompt: v.optional(v.string()), // Original prompt if applicable
-    rewrittenPrompt: v.optional(v.string()), // Rewritten prompt if applicable
-    rewrittenResponse: v.optional(v.string()), // Response to rewritten prompt if applicable
-    timestamp: v.number(), // Timestamp of the interaction
-  }),
+  
+  // Note: sustainability_interactions table has been removed
 });

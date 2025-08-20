@@ -1,7 +1,13 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Store a sustainability interaction
+// This file previously contained functions for sustainability interactions
+// The sustainability_interactions table has been removed from the schema
+
+// Placeholder functions that return empty data or success messages
+// These prevent errors in the frontend code that might still reference these functions
+
+// Placeholder for storeSustainabilityInteraction
 export const storeSustainabilityInteraction = mutation({
   args: {
     userId: v.string(),
@@ -12,72 +18,43 @@ export const storeSustainabilityInteraction = mutation({
     rewrittenResponse: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { userId, interactionType, userChoice, originalPrompt, rewrittenPrompt, rewrittenResponse } = args;
-    
-    // Store the interaction with current timestamp
-    const interactionId = await ctx.db.insert("sustainability_interactions", {
-      userId,
-      interactionType,
-      userChoice,
-      originalPrompt,
-      rewrittenPrompt,
-      rewrittenResponse,
-      timestamp: Date.now(),
-    });
-    
-    return interactionId;
+    // Return a mock ID since we're not actually storing anything
+    return "sustainability-removed-" + Date.now();
   },
 });
 
-// Get all sustainability interactions for a specific user
+// Placeholder for getUserSustainabilityInteractions
 export const getUserSustainabilityInteractions = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
-    const { userId } = args;
-    
-    return await ctx.db
-      .query("sustainability_interactions")
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .order("desc")
-      .collect();
+    // Return empty array
+    return [];
   },
 });
 
-// Get all sustainability interactions
+// Placeholder for getAllSustainabilityInteractions
 export const getAllSustainabilityInteractions = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
-      .query("sustainability_interactions")
-      .order("desc")
-      .collect();
+    // Return empty array
+    return [];
   },
 });
 
-// Get sustainability interactions by type
+// Placeholder for getSustainabilityInteractionsByType
 export const getSustainabilityInteractionsByType = query({
   args: { interactionType: v.string() },
   handler: async (ctx, args) => {
-    const { interactionType } = args;
-    
-    return await ctx.db
-      .query("sustainability_interactions")
-      .filter((q) => q.eq(q.field("interactionType"), interactionType))
-      .order("desc")
-      .collect();
+    // Return empty array
+    return [];
   },
 });
 
-// Get sustainability interactions by user choice
+// Placeholder for getSustainabilityInteractionsByChoice
 export const getSustainabilityInteractionsByChoice = query({
   args: { userChoice: v.string() },
   handler: async (ctx, args) => {
-    const { userChoice } = args;
-    
-    return await ctx.db
-      .query("sustainability_interactions")
-      .filter((q) => q.eq(q.field("userChoice"), userChoice))
-      .order("desc")
-      .collect();
+    // Return empty array
+    return [];
   },
 });

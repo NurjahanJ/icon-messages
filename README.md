@@ -115,30 +115,6 @@ netlify login
 netlify deploy
 ```
 
-## Data Export
-
-This project includes functionality to export data from the Convex database to CSV files for analysis, backup, or reporting.
-
-### Exporting Data to CSV
-
-Run the following command to export all data to CSV files:
-
-```bash
-npm run export-csv
-```
-
-This will generate three files in the project root directory:
-- `users.csv` - Contains user data
-- `conversations.csv` - Contains conversation history
-- `sustainability_interactions.csv` - Contains sustainability interaction tracking data
-
-### CSV File Format
-
-Each CSV file includes:
-- A header row with field names
-- Data rows with properly escaped values
-- Timestamps in standard format
-
 ## Troubleshooting
 
 ### Common Issues

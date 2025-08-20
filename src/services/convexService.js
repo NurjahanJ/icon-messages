@@ -60,32 +60,158 @@ export const useGetAllConversations = () => {
   return useQuery(api.conversations.getAllConversations);
 };
 
-// Empty placeholder functions for sustainability interactions
-// These functions will just log to console but not actually store data
+// Sustainability interaction functions
+// These functions store sustainability interactions in Convex
+
+// Store sustainability info prompt interaction (first prompt)
 export const useStoreSustainabilityChoice = () => {
+  const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  console.log('DEBUG: Sustainability choice mutation initialized');
+  
   return async (choice) => {
-    console.log('Sustainability choice (not stored):', choice);
-    return null;
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.error('No user ID found in localStorage');
+        return null;
+      }
+      
+      console.log('DEBUG: About to store sustainability choice with params:', {
+        userId,
+        interactionType: 'info_prompt',
+        userChoice: choice
+      });
+      
+      const interactionId = await storeSustainabilityInteractionMutation({
+        userId,
+        interactionType: 'info_prompt',
+        userChoice: choice, // 'yes' or 'no'
+      });
+      
+      console.log('Sustainability choice stored:', choice);
+      return interactionId;
+    } catch (error) {
+      console.error('Error storing sustainability choice:', error);
+      console.log('Sustainability choice (fallback):', choice);
+      return null;
+    }
   };
 };
 
+// Store reword prompt interaction (second prompt)
 export const useStoreRewordChoice = () => {
+  const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  
   return async (choice) => {
-    console.log('Reword choice (not stored):', choice);
-    return null;
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.error('No user ID found in localStorage');
+        return null;
+      }
+      
+      console.log('DEBUG: About to store reword choice with params:', {
+        userId,
+        interactionType: 'rewrite_prompt',
+        userChoice: choice
+      });
+      
+      const interactionId = await storeSustainabilityInteractionMutation({
+        userId,
+        interactionType: 'rewrite_prompt',
+        userChoice: choice, // 'continue' or 'rewrite'
+      });
+      
+      console.log('Reword choice stored:', choice);
+      return interactionId;
+    } catch (error) {
+      console.error('Error storing reword choice:', error);
+      console.log('Reword choice (fallback):', choice);
+      return null;
+    }
   };
 };
 
+// Store reworded prompt and its response
 export const useStoreRewordedPrompt = () => {
-  return async () => {
-    console.log('Reworded prompt (not stored)');
-    return null;
+  const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  
+  return async (originalPrompt, rewrittenPrompt, rewrittenResponse) => {
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.error('No user ID found in localStorage');
+        return null;
+      }
+      
+      console.log('DEBUG: About to store reworded prompt with params:', {
+        userId,
+        interactionType: 'rewritten_content',
+        userChoice: 'rewrite',
+        originalPrompt,
+        rewrittenPrompt: rewrittenPrompt.substring(0, 50) + '...' // Log truncated for brevity
+      });
+      
+      const interactionId = await storeSustainabilityInteractionMutation({
+        userId,
+        interactionType: 'rewritten_content',
+        userChoice: 'rewrite',
+        originalPrompt,
+        rewrittenPrompt,
+        rewrittenResponse,
+      });
+      
+      console.log('Reworded prompt stored');
+      return interactionId;
+    } catch (error) {
+      console.error('Error storing reworded prompt:', error);
+      console.log('Reworded prompt (fallback)');
+      return null;
+    }
   };
 };
 
+// Store break choice interaction (third prompt)
 export const useStoreBreakChoice = () => {
+  const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  
   return async (choice) => {
-    console.log('Break choice (not stored):', choice);
-    return null;
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        console.error('No user ID found in localStorage');
+        return null;
+      }
+      
+      console.log('DEBUG: About to store break choice with params:', {
+        userId,
+        interactionType: 'break_prompt',
+        userChoice: choice
+      });
+      
+      const interactionId = await storeSustainabilityInteractionMutation({
+        userId,
+        interactionType: 'break_prompt',
+        userChoice: choice, // 'continue' or 'take_break'
+      });
+      
+      console.log('Break choice stored:', choice);
+      return interactionId;
+    } catch (error) {
+      console.error('Error storing break choice:', error);
+      console.log('Break choice (fallback):', choice);
+      return null;
+    }
   };
+};
+
+// Get all sustainability interactions for the current user
+export const useGetUserSustainabilityInteractions = () => {
+  const userId = localStorage.getItem('userId');
+  return useQuery(api.sustainability.getUserSustainabilityInteractions, { userId });
+};
+
+// Get all sustainability interactions (admin function)
+export const useGetAllSustainabilityInteractions = () => {
+  return useQuery(api.sustainability.getAllSustainabilityInteractions);
 };

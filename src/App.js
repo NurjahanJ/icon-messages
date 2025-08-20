@@ -7,7 +7,11 @@ import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
 import { 
-  useStoreConversation 
+  useStoreConversation,
+  useStoreSustainabilityChoice,
+  useStoreRewordChoice,
+  useStoreRewordedPrompt,
+  useStoreBreakChoice
 } from './services/convexService';
 
 function AppContent() {
@@ -23,8 +27,13 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
+  const storeSustainabilityChoice = useStoreSustainabilityChoice();
+  const storeRewordChoice = useStoreRewordChoice();
+  const storeRewordedPrompt = useStoreRewordedPrompt();
+  const storeBreakChoice = useStoreBreakChoice();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
   const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
+  const [originalPromptBeforeReword, setOriginalPromptBeforeReword] = useState(null); // Store original prompt for tracking
 
   useEffect(() => {
     scrollToBottom();
@@ -55,11 +64,11 @@ useEffect(() => {
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
     
-    // If this is a reworded prompt (after the user clicked reword), reset the lastRewordMessageId
-    if (promptCount === 3 && lastRewordMessageId) {
-      // No longer storing the reworded prompt, just reset the state
+    // If this is a reworded prompt (after the user clicked reword)
+    if (promptCount === 3 && lastRewordMessageId && originalPromptBeforeReword) {
       console.log('Processing reworded prompt');
-      setLastRewordMessageId(null); // Reset after processing
+      // We'll store the rewritten prompt and its response after we get the response
+      // Keep the lastRewordMessageId until we get the response
     }
     
     // Check if the message is the special keyword to display user ID
@@ -142,6 +151,19 @@ useEffect(() => {
         try {
           await storeConversation(message, assistantContent);
           console.log('Conversation stored in Convex');
+          
+          // If this is a reworded prompt, store it in the sustainability_interactions table
+          if (promptCount === 3 && lastRewordMessageId && originalPromptBeforeReword) {
+            try {
+              await storeRewordedPrompt(originalPromptBeforeReword, message, assistantContent);
+              console.log('Reworded prompt and response stored in Convex');
+              // Reset tracking variables after storing
+              setLastRewordMessageId(null);
+              setOriginalPromptBeforeReword(null);
+            } catch (error) {
+              console.error('Failed to store reworded prompt in Convex:', error);
+            }
+          }
         } catch (error) {
           console.error('Failed to store conversation in Convex:', error);
         }
@@ -228,13 +250,13 @@ useEffect(() => {
     if (pendingMessage && waitingForSustainabilityAction) {
       // Track user's choice for the sustainability prompt (yes/no)
       if (action === 'no' || action === 'cancel' || action === 'yes') {
-        // Store the user's choice in the messages table
+        // Store the user's choice in the sustainability_interactions table
         storeSustainabilityChoice(action)
-          .then(messageId => {
-            console.log('Sustainability choice stored:', action);
+          .then(interactionId => {
+            console.log('Sustainability choice stored in Convex:', action, interactionId);
           })
           .catch(error => {
-            console.error('Failed to store sustainability choice:', error);
+            console.error('Failed to store sustainability choice in Convex:', error);
           });
       }
       
@@ -246,8 +268,14 @@ useEffect(() => {
         // We'll wait for explicit user interaction with the Continue button
         // The Continue button is added in the SustainabilityPrompt component
       } else if (action === 'continue') {
-        // Log user's choice for continue (no longer storing in database)
-        console.log('User chose to continue with original prompt');
+        // Store user's choice to continue with original prompt
+        storeRewordChoice('continue')
+          .then(interactionId => {
+            console.log('Continue choice stored in Convex:', interactionId);
+          })
+          .catch(error => {
+            console.error('Failed to store continue choice in Convex:', error);
+          });
         
         // Process the message when the user explicitly clicks Continue
         if (pendingMessage) {
@@ -260,6 +288,9 @@ useEffect(() => {
           // Get the original 3rd prompt before removing it from UI
           const originalPrompt = messages[messages.length - 1].content;
           
+          // Store the original prompt for later use when the rewritten prompt is submitted
+          setOriginalPromptBeforeReword(originalPrompt);
+          
           // Store the original prompt in Convex with a special flag
           if (userId) {
             try {
@@ -267,10 +298,18 @@ useEffect(() => {
               storeConversation(originalPrompt, "[Original prompt before rewording]");
               console.log('Original 3rd prompt stored in Convex');
               
-              // Log user's choice to reword (no longer storing in database)
-              console.log('User chose to reword their prompt');
-              // Use a dummy ID for tracking
-              setLastRewordMessageId('reword-' + Date.now());
+              // Store user's choice to reword in Convex
+              storeRewordChoice('rewrite')
+                .then(interactionId => {
+                  console.log('Reword choice stored in Convex:', interactionId);
+                  // Use the actual interaction ID for tracking
+                  setLastRewordMessageId(interactionId);
+                })
+                .catch(error => {
+                  console.error('Failed to store reword choice in Convex:', error);
+                  // Use a dummy ID for tracking as fallback
+                  setLastRewordMessageId('reword-' + Date.now());
+                });
             } catch (error) {
               console.error('Failed to store original prompt in Convex:', error);
             }
@@ -302,9 +341,15 @@ useEffect(() => {
     if (pendingMessage && waitingForEighthAction) {
       // Track user's choice for the break message prompt
       if (action === 'eighth-no' || action === 'eighth-yes') {
-        // Log the user's choice (no longer storing in database)
-        const breakChoice = action === 'eighth-no' ? 'continue' : 'break';
-        console.log('User break choice:', breakChoice);
+        // Store the user's choice in Convex
+        const breakChoice = action === 'eighth-no' ? 'continue' : 'take_break';
+        storeBreakChoice(breakChoice)
+          .then(interactionId => {
+            console.log('Break choice stored in Convex:', breakChoice, interactionId);
+          })
+          .catch(error => {
+            console.error('Failed to store break choice in Convex:', error);
+          });
       }
       
       if (action === 'eighth-no') {

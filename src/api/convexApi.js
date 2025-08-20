@@ -13,5 +13,12 @@ export const api = {
     storeConversation: "conversations:storeConversation",
     getUserConversations: "conversations:getUserConversations",
     getAllConversations: "conversations:getAllConversations"
+  },
+  sustainability: {
+    storeSustainabilityInteraction: "sustainability:storeSustainabilityInteraction",
+    getUserSustainabilityInteractions: "sustainability:getUserSustainabilityInteractions",
+    getAllSustainabilityInteractions: "sustainability:getAllSustainabilityInteractions",
+    getSustainabilityInteractionsByType: "sustainability:getSustainabilityInteractionsByType",
+    getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice"
   }
 };

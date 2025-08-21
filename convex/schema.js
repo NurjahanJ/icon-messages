@@ -15,4 +15,6 @@ export default defineSchema({
     prompt: v.string(),
     response: v.string(),
   }),
+  
+  // Note: sustainability_interactions table has been removed
 });

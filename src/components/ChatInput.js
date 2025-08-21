@@ -26,7 +26,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
       }
     }
     return {
-      saveEarth: false,
+      saveEarth: true,
       search: false,
       write: false,
       research: false,
@@ -166,7 +166,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
             <div className="flex items-center">
               <PiLeaf className="h-4 w-4 mr-2 text-green-600" />
               <span className="text-sm text-green-700 font-medium">
-                Efficient prompts save energy!
+                Save Earth tool is on for energy-efficient prompting. Thank you for being environmentally conscious!
               </span>
             </div>
             <button

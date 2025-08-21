@@ -6,7 +6,10 @@ import Header from './components/Header';
 import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
-import { useStoreConversation } from './services/convexService';
+import { 
+  useStoreConversation,
+  useStoreSustainabilityChoice
+} from './services/convexService';
 
 function AppContent() {
   const [messages, setMessages] = useState([]);
@@ -21,7 +24,9 @@ function AppContent() {
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
+  const storeSustainabilityChoice = useStoreSustainabilityChoice();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
+  const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
 
   useEffect(() => {
     scrollToBottom();
@@ -52,6 +57,13 @@ useEffect(() => {
   const processMessage = async (message, modelId = 'gpt-4o') => {
     if (!message.trim()) return;
     
+    // If this is a reworded prompt (after the user clicked reword), reset the lastRewordMessageId
+    if (promptCount === 3 && lastRewordMessageId) {
+      // No longer storing the reworded prompt, just reset the state
+      console.log('Processing reworded prompt');
+      setLastRewordMessageId(null); // Reset after processing
+    }
+    
     // Check if the message is the special keyword to display user ID
     if (message.trim().toUpperCase() === 'GREENERAI') {
       // Create user message object
@@ -64,7 +76,18 @@ useEffect(() => {
       
       // Update messages with both the user message and the response
       setMessages([...messages, userMessage, userIdResponse]);
-      return; // Exit early, don't process further
+      
+      // Store conversation in Convex if user is authenticated
+      if (userId) {
+        try {
+          storeConversation(message, `Your User ID is: ${userId || 'Not available'}`);
+          console.log('GREENERAI message stored in Convex');
+        } catch (error) {
+          console.error('Failed to store GREENERAI message in Convex:', error);
+        }
+      }
+      
+      return; // Exit after storing the conversation
     }
 
     // Create user message object
@@ -205,6 +228,18 @@ useEffect(() => {
   const handleSustainabilityAction = (action, userId = null) => {
     // Handle 3rd message sustainability prompt actions
     if (pendingMessage && waitingForSustainabilityAction) {
+      // Track user's choice for the sustainability prompt (yes/no)
+      if (action === 'no' || action === 'cancel' || action === 'yes') {
+        // Store the user's choice in the messages table
+        storeSustainabilityChoice(action)
+          .then(messageId => {
+            console.log('Sustainability choice stored:', action);
+          })
+          .catch(error => {
+            console.error('Failed to store sustainability choice:', error);
+          });
+      }
+      
       if (action === 'no' || action === 'cancel') {
         // If user clicks No or Cancel, process the message normally
         processMessage(pendingMessage.message, pendingMessage.modelId);
@@ -213,6 +248,9 @@ useEffect(() => {
         // We'll wait for explicit user interaction with the Continue button
         // The Continue button is added in the SustainabilityPrompt component
       } else if (action === 'continue') {
+        // Log user's choice for continue (no longer storing in database)
+        console.log('User chose to continue with original prompt');
+        
         // Process the message when the user explicitly clicks Continue
         if (pendingMessage) {
           processMessage(pendingMessage.message, pendingMessage.modelId);
@@ -221,12 +259,36 @@ useEffect(() => {
         // If user clicks Reword Prompt, remove the last message and reset the prompt count
         // This allows the user to rewrite their third prompt
         if (messages.length > 0) {
+          // Get the original 3rd prompt before removing it from UI
+          const originalPrompt = messages[messages.length - 1].content;
+          
+          // Store the original prompt in Convex with a special flag
+          if (userId) {
+            try {
+              // Store the original 3rd prompt in Convex with a placeholder response
+              storeConversation(originalPrompt, "[Original prompt before rewording]");
+              console.log('Original 3rd prompt stored in Convex');
+              
+              // Log user's choice to reword (no longer storing in database)
+              console.log('User chose to reword their prompt');
+              // Use a dummy ID for tracking
+              setLastRewordMessageId('reword-' + Date.now());
+            } catch (error) {
+              console.error('Failed to store original prompt in Convex:', error);
+            }
+          }
+          
           // Remove the last message (which is the third prompt)
           const newMessages = messages.slice(0, -1);
-          setMessages(newMessages);
           
-          // Reset the prompt count to 2 so the next message will be the third prompt again
-          setPromptCount(2);
+          // Add feedback message for rewording
+          const feedbackMessage = createAssistantMessage("Good decision about rewording your prompt! Specific, concise, and combined prompts saves energy. Your efforts to promote eco-friendly practices are truly inspiring.");
+          feedbackMessage.timestamp = new Date().toISOString();
+          
+          setMessages([...newMessages, feedbackMessage]);
+          
+          // Don't reset the prompt count - keep the original prompt as #3 and make the reworded prompt #4
+          // The original prompt count is already 3 at this point, so we don't need to change it
           
           // Clear the pending message
           setPendingMessage(null);
@@ -240,24 +302,127 @@ useEffect(() => {
     
     // Handle 8th message sustainability prompt actions
     if (pendingMessage && waitingForEighthAction) {
+      // Track user's choice for the break message prompt
+      if (action === 'eighth-no' || action === 'eighth-yes') {
+        // Log the user's choice (no longer storing in database)
+        const breakChoice = action === 'eighth-no' ? 'continue' : 'break';
+        console.log('User break choice:', breakChoice);
+      }
+      
       if (action === 'eighth-no') {
         // If user clicks No, process the message normally
         processMessage(pendingMessage.message, pendingMessage.modelId);
         setWaitingForEighthAction(false);
       } else if (action === 'eighth-yes') {
-        // If user clicks Yes, show a thank you message with user ID and don't process the message
-        if (messages.length > 0) {
-          // Create a thank you message with user ID
-          const userIdMessage = userId ? `\n\nYour User ID is: ${userId}` : '';
-          const thankYouMessage = createAssistantMessage(`Thanks for taking a break! ${userIdMessage}`);
-          thankYouMessage.timestamp = new Date().toISOString();
+        // If user clicks Yes, first process their message and then show a thank you message
+        if (messages.length > 0 && pendingMessage) {
+          // First process the user's message to get a response
+          const processUserMessage = async () => {
+            try {
+              // User message should already be added to messages
+              // Create loading message
+              const loadingMessage = {
+                role: 'assistant',
+                content: '',
+                isLoading: true,
+                timestamp: new Date().toISOString(),
+              };
+              
+              // Add loading message
+              setMessages(prevMessages => [...prevMessages, loadingMessage]);
+              setLoading(true);
+              
+              // Send the message to get a response
+              const messagesToSend = [...messages];
+              const response = await sendConversation(messagesToSend, pendingMessage.modelId);
+              
+              // Get the assistant's response
+              const assistantContent = response.choices?.[0]?.message?.content || 
+                "I apologize, but I couldn't generate a response.";
+              const assistantMessage = createAssistantMessage(assistantContent);
+              assistantMessage.timestamp = new Date().toISOString();
+              
+              // Update messages with the assistant's response
+              setMessages(prevMessages => {
+                // Remove loading message
+                const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+                return [...filteredMessages, assistantMessage];
+              });
+              
+              // Store conversation in Convex if user is authenticated
+              if (userId) {
+                try {
+                  await storeConversation(pendingMessage.message, assistantContent);
+                  console.log('Conversation stored in Convex');
+                } catch (error) {
+                  console.error('Failed to store conversation in Convex:', error);
+                }
+              }
+              
+              // After processing the message, add the thank you message
+              setTimeout(() => {
+                // Check if the last message contains 'GREENERAI' to show user ID
+                const lastMessage = messages[messages.length - 1];
+                const showUserId = lastMessage && lastMessage.role === 'user' && 
+                                  lastMessage.content && lastMessage.content.toUpperCase().includes('GREENERAI');
+                
+                // Only include user ID if GREENERAI was typed
+                const userIdMessage = showUserId && userId ? `\n\nYour User ID is: ${userId}` : '';
+                
+                // New thank you message with sustainability focus
+                const thankYouMessage = createAssistantMessage(`Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.${userIdMessage}`);
+                thankYouMessage.timestamp = new Date().toISOString();
+                
+                // Add a flag to identify this as a break message for styling
+                thankYouMessage.isBreakMessage = true;
+                
+                // Update the messages with the thank you message
+                setMessages(prevMessages => [...prevMessages, thankYouMessage]);
+                
+                // Clear the pending message and reset waiting state
+                setPendingMessage(null);
+                setWaitingForEighthAction(false);
+                setLoading(false);
+              }, 1000); // Add a small delay between the response and thank you message
+              
+            } catch (err) {
+              console.error('Error processing message:', err);
+              
+              // Handle error case
+              let errorContent = "Sorry, something went wrong.";
+              if (err.message.includes('timeout')) {
+                errorContent = "The request timed out. Please try again later.";
+              } else if (err.message.includes('rate limit')) {
+                errorContent = "Rate limit exceeded. Please try again in a few moments.";
+              }
+              
+              const errorMessage = createAssistantMessage(errorContent);
+              errorMessage.timestamp = new Date().toISOString();
+              errorMessage.isError = true;
+              
+              // Update messages with error
+              setMessages(prevMessages => {
+                // Remove loading message
+                const filteredMessages = prevMessages.filter(msg => !msg.isLoading);
+                return [...filteredMessages, errorMessage];
+              });
+              
+              // Still show thank you message after error
+              setTimeout(() => {
+                const thankYouMessage = createAssistantMessage("Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.");
+                thankYouMessage.timestamp = new Date().toISOString();
+                thankYouMessage.isBreakMessage = true;
+                
+                setMessages(prevMessages => [...prevMessages, thankYouMessage]);
+                setPendingMessage(null);
+                setWaitingForEighthAction(false);
+                setLoading(false);
+              }, 1000);
+            }
+          };
           
-          // Update the messages with the thank you message
-          setMessages([...messages, thankYouMessage]);
-          
-          // Clear the pending message and reset waiting state
-          setPendingMessage(null);
-          setWaitingForEighthAction(false);
+          // Start processing the message
+          processUserMessage();
         }
       }
     }
@@ -372,7 +537,6 @@ useEffect(() => {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="text-center max-w-xl mb-6">
-            <h2 className="text-3xl mb-10 text-center">
             <h2 className="text-3xl text-center text-gray-900 mb-10 font-normal">
   Turn on <img src="/images/leaf-svg.svg" alt="leaf" style={{ width: '24px', height: '24px', display: 'inline', marginRight: '4px', marginLeft: '4px' }} /> <button
     onClick={() => {
@@ -387,10 +551,6 @@ useEffect(() => {
   >
     Save Earth
   </button> tool for sustainable and eco-friendly chats.
-</h2>
-
-
-
 </h2>
              
             </div>

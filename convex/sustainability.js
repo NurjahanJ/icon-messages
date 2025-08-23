@@ -79,3 +79,22 @@ export const storeInfoPromptResponse = mutation({
     return id;
   },
 });
+
+// Store break message response in messages_info table
+export const storeBreakMessageResponse = mutation({
+  args: {
+    userId: v.string(),
+    response: v.string(), // 'continue' or 'break'
+  },
+  handler: async (ctx, args) => {
+    const { userId, response } = args;
+    
+    // Store the response in the messages_info table
+    const id = await ctx.db.insert("messages_info", {
+      userId,
+      break_message: response, // Store 'continue' or 'break'
+    });
+    
+    return id;
+  },
+});

@@ -16,6 +16,7 @@ import type {
 import type * as conversations from "../conversations.js";
 import type * as migrations from "../migrations.js";
 import type * as sustainability from "../sustainability.js";
+import type * as test from "../test.js";
 import type * as users from "../users.js";
 
 /**
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   migrations: typeof migrations;
   sustainability: typeof sustainability;
+  test: typeof test;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

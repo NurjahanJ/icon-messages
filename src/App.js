@@ -5,11 +5,13 @@ import ChatInput from './components/ChatInput';
 import Header from './components/Header';
 import logo from './images/logo.png';
 import SustainabilityPrompt from './components/SustainabilityPrompt';
+import BreakMessagePrompt from './components/BreakMessagePrompt';
 import { ConvexProviderWrapper, useUser } from './contexts/ConvexContext';
 import { 
   useStoreConversation,
   useStoreSustainabilityChoice
 } from './services/convexService';
+import { useStoreBreakMessageResponse } from './services/breakMessageService';
 
 function AppContent() {
   const [messages, setMessages] = useState([]);
@@ -25,6 +27,7 @@ function AppContent() {
   const { userId } = useUser();
   const storeConversation = useStoreConversation();
   const storeSustainabilityChoice = useStoreSustainabilityChoice();
+  const storeBreakMessageResponse = useStoreBreakMessageResponse();
   const [isSaveEarthEnabled, setIsSaveEarthEnabled] = useState(false); // Always start with Save Earth disabled
   const [lastRewordMessageId, setLastRewordMessageId] = useState(null); // Track message ID for reworded prompts
 
@@ -304,9 +307,11 @@ useEffect(() => {
     if (pendingMessage && waitingForEighthAction) {
       // Track user's choice for the break message prompt
       if (action === 'eighth-no' || action === 'eighth-yes') {
-        // Log the user's choice (no longer storing in database)
+        // Store the user's choice in the database
         const breakChoice = action === 'eighth-no' ? 'continue' : 'break';
-        console.log('User break choice:', breakChoice);
+        storeBreakMessageResponse(breakChoice)
+          .then(id => console.log('Break message response stored with ID:', id))
+          .catch(err => console.error('Error storing break message response:', err));
       }
       
       if (action === 'eighth-no') {
@@ -575,13 +580,25 @@ useEffect(() => {
             <div className="p-4 bg-white flex justify-center">
               <div className="w-full max-w-[850px]">
               {isSaveEarthEnabled && (
-   <SustainabilityPrompt 
-    promptCount={promptCount} 
-    onSustainabilityAction={handleSustainabilityAction}
-    waitingForAction={waitingForSustainabilityAction}
-    waitingForEighthAction={waitingForEighthAction}
-    userId={userId}
-  />
+  <>
+    <SustainabilityPrompt 
+      promptCount={promptCount} 
+      onSustainabilityAction={handleSustainabilityAction}
+      waitingForAction={waitingForSustainabilityAction}
+      waitingForEighthAction={waitingForEighthAction}
+      userId={userId}
+    />
+    {waitingForEighthAction && (
+      <BreakMessagePrompt 
+        onClose={(choice) => {
+          // Map the choice to the expected format for handleSustainabilityAction
+          const action = choice === 'continue' ? 'eighth-no' : 
+                        choice === 'break' ? 'eighth-yes' : 'eighth-no';
+          handleSustainabilityAction(action);
+        }} 
+      />
+    )}
+  </>
 )}
                 <ChatInput onSendMessage={handleSendMessage} disabled={loading} />
               </div>

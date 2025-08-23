@@ -94,7 +94,28 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
     );
   }
 
-  // Break message prompt is now handled by the BreakMessagePrompt component in App.js
+  if (promptCount === 6 && waitingForEighthAction) {
+    return (
+      <div className="sustainability-prompt bg-red-50 border-l-4 border-red-500 text-sm text-red-800 p-4 rounded-md my-4">
+        <div className="flex justify-between items-start">
+          <p className="mb-2">
+            🔋 Whoa there! GenAI prompts use more energy than a typical web search, and you're about to pass the average ChatGPT daily prompts! How about taking a little break?
+          </p>
+          <button 
+            onClick={handleEighthNoClick} 
+            className="ml-2 text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+        
+        <div className="flex justify-end gap-4">
+          <button onClick={handleEighthNoClick} className="px-3 py-1 border border-gray-400 rounded">Continue</button>
+          <button onClick={handleEighthYesClick} className="px-3 py-1 bg-green-600 text-white rounded">I can use a break!</button>
+        </div>
+      </div>
+    );
+  }
 
   return null;
 };

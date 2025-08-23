@@ -22,7 +22,6 @@ export const api = {
     getAllSustainabilityInteractions: "sustainability:getAllSustainabilityInteractions",
     getSustainabilityInteractionsByType: "sustainability:getSustainabilityInteractionsByType",
     getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice",
-    storeInfoPromptResponse: "sustainability:storeInfoPromptResponse",
-    storeBreakMessageResponse: "sustainability:storeBreakMessageResponse"
+    storeInfoPromptResponse: "sustainability:storeInfoPromptResponse"
   }
 };

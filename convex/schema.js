@@ -20,7 +20,6 @@ export default defineSchema({
   messages_info: defineTable({
     userId: v.string(), // User who sent the message
     info_prompt: v.optional(v.string()), // User response to sustainability prompt (yes/no)
-    break_message: v.optional(v.string()), // User response to break prompt ("continue" or "break")
     // Using Convex's built-in _creationTime for timestamp
   }),
 });

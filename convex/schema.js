@@ -18,10 +18,8 @@ export default defineSchema({
   
   // Table to store message information
   messages_info: defineTable({
-    messageId: v.string(), // Unique message ID
     userId: v.string(), // User who sent the message
-    content: v.string(), // Message content
-    timestamp: v.number(), // When the message was sent
-    isRead: v.boolean(), // Whether the message has been read
+    info_prompt: v.optional(v.string()), // User response to sustainability prompt (yes/no)
+    // Using Convex's built-in _creationTime for timestamp
   }),
 });

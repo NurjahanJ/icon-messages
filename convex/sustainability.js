@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { v4 as uuidv4 } from "uuid";
 
 // This file contains placeholder functions for sustainability interactions
 // These functions maintain API compatibility for frontend components
@@ -56,5 +57,25 @@ export const getSustainabilityInteractionsByChoice = query({
   handler: async (ctx, args) => {
     // Return empty array
     return [];
+  },
+});
+
+// Store sustainability prompt response in messages_info table
+export const storeInfoPromptResponse = mutation({
+  args: {
+    userId: v.string(),
+    response: v.string(), // 'yes' or 'no'
+  },
+  handler: async (ctx, args) => {
+    const { userId, response } = args;
+    
+    // Store the response in the messages_info table with simplified schema
+    // Using Convex's built-in _creationTime instead of timestamp
+    const id = await ctx.db.insert("messages_info", {
+      userId,
+      info_prompt: response, // Store 'yes' or 'no'
+    });
+    
+    return id;
   },
 });

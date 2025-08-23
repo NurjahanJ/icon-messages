@@ -21,6 +21,7 @@ export const api = {
     getUserSustainabilityInteractions: "sustainability:getUserSustainabilityInteractions",
     getAllSustainabilityInteractions: "sustainability:getAllSustainabilityInteractions",
     getSustainabilityInteractionsByType: "sustainability:getSustainabilityInteractionsByType",
-    getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice"
+    getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice",
+    storeInfoPromptResponse: "sustainability:storeInfoPromptResponse"
   }
 };

@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
+import { useStoreInfoPromptResponse } from '../services/sustainabilityService';
 
 const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForAction = false, waitingForEighthAction = false, userId }) => {
   const [showInfo, setShowInfo] = useState(false);
+  const storeInfoPromptResponse = useStoreInfoPromptResponse();
 
   // Handle user clicking Yes button
   const handleYesClick = () => {
     setShowInfo(true);
     onSustainabilityAction('yes');
+    // Store the 'yes' response in messages_info table
+    storeInfoPromptResponse('yes')
+      .then(id => console.log('Stored yes response with ID:', id))
+      .catch(err => console.error('Error storing yes response:', err));
   };
 
   // Handle user clicking No button
   const handleNoClick = () => {
     onSustainabilityAction('no');
+    // Store the 'no' response in messages_info table
+    storeInfoPromptResponse('no')
+      .then(id => console.log('Stored no response with ID:', id))
+      .catch(err => console.error('Error storing no response:', err));
   };
 
   // Handle user clicking Cancel (X) button

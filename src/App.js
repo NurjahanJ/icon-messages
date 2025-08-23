@@ -20,6 +20,7 @@ function AppContent() {
   const [waitingForSustainabilityAction, setWaitingForSustainabilityAction] = useState(false);
   const [waitingForEighthAction, setWaitingForEighthAction] = useState(false);
   const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
+  const [isRewordedPrompt, setIsRewordedPrompt] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
   const { userId } = useUser();
@@ -188,7 +189,15 @@ useEffect(() => {
   const [sustainabilityPromptShown, setSustainabilityPromptShown] = useState(false);
 
   const handleSendMessage = (message, modelId = 'gpt-4o') => {
-    const newPromptCount = promptCount + 1;
+    // If it's a reworded prompt after the 3rd prompt, count it as 3.5 instead of 4
+    let newPromptCount;
+    if (promptCount === 3 && lastRewordMessageId) {
+      newPromptCount = 3.5;
+      setIsRewordedPrompt(true);
+    } else {
+      newPromptCount = promptCount + 1;
+      setIsRewordedPrompt(false);
+    }
     setPromptCount(newPromptCount);
   
     if (newPromptCount === 3 && !sustainabilityPromptShown) {
@@ -204,7 +213,7 @@ useEffect(() => {
         processMessage(message, modelId);
         setSustainabilityPromptShown(true);
       }
-    } else if (newPromptCount === 6 && !eighthMessagePromptShown) {
+    } else if (Math.floor(newPromptCount) === 6 && !eighthMessagePromptShown) {
       if (isSaveEarthEnabled) {
         setPendingMessage({ message, modelId });
         setWaitingForEighthAction(true);

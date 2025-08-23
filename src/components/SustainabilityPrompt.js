@@ -94,7 +94,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
     );
   }
 
-  if (promptCount === 6 && waitingForEighthAction) {
+  if (Math.floor(promptCount) === 6 && waitingForEighthAction) {
     return (
       <div className="sustainability-prompt bg-red-50 border-l-4 border-red-500 text-sm text-red-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">

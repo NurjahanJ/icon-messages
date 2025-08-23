@@ -16,4 +16,12 @@ export default defineSchema({
     response: v.string(),
   }),
   
+  // Table to store message information
+  messages_info: defineTable({
+    messageId: v.string(), // Unique message ID
+    userId: v.string(), // User who sent the message
+    content: v.string(), // Message content
+    timestamp: v.number(), // When the message was sent
+    isRead: v.boolean(), // Whether the message has been read
+  }),
 });

@@ -1,8 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// This file previously contained functions for sustainability interactions
-// The sustainability_interactions table has been removed from the schema
+// This file contains placeholder functions for sustainability interactions
+// These functions maintain API compatibility for frontend components
 
 // Placeholder functions that return empty data or success messages
 // These prevent errors in the frontend code that might still reference these functions

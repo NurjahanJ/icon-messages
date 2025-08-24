@@ -164,7 +164,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
           <div className="flex items-center justify-between mb-3 px-4 py-3 rounded-2xl border border-green-100 bg-green-50">
             <div className="flex items-center">
               <PiLeaf className="h-4 w-4 mr-2 text-green-600" />
-              <span className="text-sm text-green-700 font-medium">
+              <span className="text-sm text-green-700 font-bold">
                 Save Earth tool is on for energy-efficient prompting. Thank you for being environmentally conscious!
               </span>
             </div>

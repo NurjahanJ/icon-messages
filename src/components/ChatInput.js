@@ -72,6 +72,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const [toolsMenuPosition, setToolsMenuPosition] = useState({ top: 0, left: 0 });
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
   const toolsMenuRef = useRef(null);
   const toolsButtonRef = useRef(null);
   const { hasReachedLimit } = usePromptCount();
@@ -204,6 +205,16 @@ const ChatInput = ({ onSendMessage, disabled }) => {
           </div>
 
           <div className="flex items-center px-2 py-3">
+            {/* Hidden file input */}
+            <input
+              id="file-upload"
+              type="file"
+              ref={fileInputRef}
+              onChange={() => setIsToolsMenuOpen(false)}
+              className="hidden"
+              accept="image/*,.pdf,.doc,.docx,.txt"
+            />
+            
             {/* Tools button */}
             <div className="relative">
               <button
@@ -220,22 +231,23 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                 className="flex items-center ml-2 text-gray-500 hover:text-gray-700"
                 disabled={disabled || hasReachedLimit}
               >
-                <HiOutlineAdjustmentsHorizontal className="h-5 w-5" />
-                <span className="ml-1 text-sm">Tools</span>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
               </button>
 
               {isToolsMenuOpen && (
                 <div
                   ref={toolsMenuRef}
-                  className="fixed w-64 rounded-2xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
-                  style={{
-                    top: `${toolsMenuPosition.top}px`,
-                    left: `${toolsMenuPosition.left}px`,
-                    transform: 'translateY(-100%)',
-                    marginTop: '-10px',
-                  }}
+                  className="fixed w-64 rounded-2xl shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 border border-gray-200"
+                  style={{ top: `${toolsMenuPosition.top}px`, left: `${toolsMenuPosition.left}px`, transform: 'translateY(-100%)', marginTop: '-10px' }}
                 >
-                  <div className="py-2 divide-y divide-gray-200">
+                  <div className="py-2">
+                    <label htmlFor="file-upload" className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-800 hover:bg-gray-100 cursor-pointer">
+                      <img src="/images/clip.png" alt="Upload files" className="mr-3 h-5 w-5" />
+                      Add photos & files
+                    </label>
+                    <div className="border-t border-gray-200 my-1"></div>
                     <button
                       className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-800 hover:bg-gray-100"
                       onClick={() => {
@@ -275,23 +287,6 @@ const ChatInput = ({ onSendMessage, disabled }) => {
 
             <div className="flex-grow px-2"></div>
 
-            {/* Microphone */}
-            <button
-              type="button"
-              onClick={toggleSpeechRecognition}
-              disabled={disabled || hasReachedLimit}
-              className={`p-2 rounded-full flex items-center justify-center ${
-                disabled || hasReachedLimit
-                  ? 'opacity-50 cursor-not-allowed'
-                  : ''
-              } ${isListening ? 'text-red-500 bg-gray-100' : 'text-gray-500 hover:bg-gray-100'}`}
-            >
-              {isListening ? (
-                <FaMicrophoneSlash className="h-5 w-5" />
-              ) : (
-                <FaMicrophone className="h-5 w-5" />
-              )}
-            </button>
 
             {/* Send */}
             <button
@@ -303,7 +298,9 @@ const ChatInput = ({ onSendMessage, disabled }) => {
                   : ''
               } bg-gray-200 text-gray-600 hover:bg-gray-300`}
             >
-              <FaPaperPlane className="h-4 w-4" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
             </button>
           </div>
         </div>

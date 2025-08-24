@@ -14,6 +14,8 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as conversations from "../conversations.js";
+import type * as message_one from "../message_one.js";
+import type * as migrations from "../migrations.js";
 import type * as sustainability from "../sustainability.js";
 import type * as users from "../users.js";
 
@@ -27,6 +29,8 @@ import type * as users from "../users.js";
  */
 declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
+  message_one: typeof message_one;
+  migrations: typeof migrations;
   sustainability: typeof sustainability;
   users: typeof users;
 }>;

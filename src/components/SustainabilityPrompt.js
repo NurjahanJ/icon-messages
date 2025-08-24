@@ -1,17 +1,48 @@
 import React, { useState } from 'react';
+import { useStoreInfoPromptResponse } from '../services/sustainabilityService';
+import { useStoreInfoMessageChoice, useStoreRewordChoice, useStoreBreakMessageChoice } from '../services/messageOneService';
 
 const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForAction = false, waitingForEighthAction = false, userId }) => {
   const [showInfo, setShowInfo] = useState(false);
+  const [messageId, setMessageId] = useState(null);
+  const storeInfoPromptResponse = useStoreInfoPromptResponse();
+  const storeInfoMessageChoice = useStoreInfoMessageChoice();
+  const storeRewordChoice = useStoreRewordChoice();
+  const storeBreakMessageChoice = useStoreBreakMessageChoice();
 
   // Handle user clicking Yes button
   const handleYesClick = () => {
     setShowInfo(true);
     onSustainabilityAction('yes');
+    // Store the 'yes' response in messages_info table
+    storeInfoPromptResponse('yes')
+      .then(id => console.log('Stored yes response with ID:', id))
+      .catch(err => console.error('Error storing yes response:', err));
+    
+    // Also store in the new message-one table
+    storeInfoMessageChoice('yes')
+      .then(id => {
+        console.log('Stored yes choice in message_one with ID:', id);
+        setMessageId(id);
+      })
+      .catch(err => console.error('Error storing yes choice in message_one:', err));
   };
 
   // Handle user clicking No button
   const handleNoClick = () => {
     onSustainabilityAction('no');
+    // Store the 'no' response in messages_info table
+    storeInfoPromptResponse('no')
+      .then(id => console.log('Stored no response with ID:', id))
+      .catch(err => console.error('Error storing no response:', err));
+    
+    // Also store in the new message-one table
+    storeInfoMessageChoice('no')
+      .then(id => {
+        console.log('Stored no choice in message_one with ID:', id);
+        setMessageId(id);
+      })
+      .catch(err => console.error('Error storing no choice in message_one:', err));
   };
 
   // Handle user clicking Cancel (X) button
@@ -19,19 +50,34 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
     onSustainabilityAction('cancel');
   };
   
-  // Handle 8th message Yes button
+  // Handle 8th message Yes button (take a break)
   const handleEighthYesClick = () => {
     onSustainabilityAction('eighth-yes', userId);
+    
+    // Store the break choice in message_one table
+    storeBreakMessageChoice('break', messageId)
+      .then(id => console.log('Stored break choice in message_one with ID:', id))
+      .catch(err => console.error('Error storing break choice in message_one:', err));
   };
   
-  // Handle 8th message No button
+  // Handle 8th message No button (continue)
   const handleEighthNoClick = () => {
     onSustainabilityAction('eighth-no');
+    
+    // Store the continue choice in message_one table
+    storeBreakMessageChoice('continue', messageId)
+      .then(id => console.log('Stored continue choice in message_one with ID:', id))
+      .catch(err => console.error('Error storing continue choice in message_one:', err));
   };
   
   // Handle Continue button click
   const handleContinueClick = () => {
     onSustainabilityAction('continue');
+    
+    // Store the continue choice in message_one table
+    storeRewordChoice('continue', messageId)
+      .then(id => console.log('Stored continue choice in message_one with ID:', id))
+      .catch(err => console.error('Error storing continue choice in message_one:', err));
   };
 
   if (promptCount === 3 && waitingForAction) {
@@ -72,7 +118,13 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
                 Continue
               </button>
               <button 
-                onClick={() => onSustainabilityAction('reword')} 
+                onClick={() => {
+                  onSustainabilityAction('reword');
+                  // Store the reword choice in message_one table
+                  storeRewordChoice('reword', messageId)
+                    .then(id => console.log('Stored reword choice in message_one with ID:', id))
+                    .catch(err => console.error('Error storing reword choice in message_one:', err));
+                }} 
                 className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
               >
                 Reword Prompt?
@@ -84,7 +136,7 @@ const SustainabilityPrompt = ({ promptCount, onSustainabilityAction, waitingForA
     );
   }
 
-  if (promptCount === 6 && waitingForEighthAction) {
+  if (Math.floor(promptCount) === 6 && waitingForEighthAction) {
     return (
       <div className="sustainability-prompt bg-red-50 border-l-4 border-red-500 text-sm text-red-800 p-4 rounded-md my-4">
         <div className="flex justify-between items-start">

@@ -1,8 +1,9 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { v4 as uuidv4 } from "uuid";
 
-// This file previously contained functions for sustainability interactions
-// The sustainability_interactions table has been removed from the schema
+// This file contains placeholder functions for sustainability interactions
+// These functions maintain API compatibility for frontend components
 
 // Placeholder functions that return empty data or success messages
 // These prevent errors in the frontend code that might still reference these functions
@@ -56,5 +57,22 @@ export const getSustainabilityInteractionsByChoice = query({
   handler: async (ctx, args) => {
     // Return empty array
     return [];
+  },
+});
+
+// Placeholder for storeInfoPromptResponse (messages_info table has been removed)
+export const storeInfoPromptResponse = mutation({
+  args: {
+    userId: v.string(),
+    response: v.string(), // 'yes' or 'no'
+  },
+  handler: async (ctx, args) => {
+    const { userId, response } = args;
+    
+    // Table has been removed, just log the response and return a mock ID
+    console.log(`User ${userId} responded with ${response} to sustainability prompt`);
+    
+    // Return a mock ID since we're not actually storing anything
+    return "table-removed-" + Date.now();
   },
 });

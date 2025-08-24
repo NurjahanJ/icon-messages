@@ -21,6 +21,15 @@ export const api = {
     getUserSustainabilityInteractions: "sustainability:getUserSustainabilityInteractions",
     getAllSustainabilityInteractions: "sustainability:getAllSustainabilityInteractions",
     getSustainabilityInteractionsByType: "sustainability:getSustainabilityInteractionsByType",
-    getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice"
+    getSustainabilityInteractionsByChoice: "sustainability:getSustainabilityInteractionsByChoice",
+    storeInfoPromptResponse: "sustainability:storeInfoPromptResponse"
+  },
+  // New API endpoints for message_one table
+  message_one: {
+    storeInfoMessageChoice: "message_one:storeInfoMessageChoice",
+    storeRewordChoice: "message_one:storeRewordChoice",
+    storeBreakMessageChoice: "message_one:storeBreakMessageChoice",
+    getUserMessageChoices: "message_one:getUserMessageChoices",
+    getAllMessageChoices: "message_one:getAllMessageChoices"
   }
 };

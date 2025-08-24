@@ -20,6 +20,7 @@ function AppContent() {
   const [waitingForSustainabilityAction, setWaitingForSustainabilityAction] = useState(false);
   const [waitingForEighthAction, setWaitingForEighthAction] = useState(false);
   const [eighthMessagePromptShown, setEighthMessagePromptShown] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [isRewordedPrompt, setIsRewordedPrompt] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);

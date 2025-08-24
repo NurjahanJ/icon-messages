@@ -62,6 +62,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
     };
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const [isListening, setIsListening] = useState(false);
   const [isToolsMenuOpen, setIsToolsMenuOpen] = useState(false);
   const [toolsMenuPosition, setToolsMenuPosition] = useState({ top: 0, left: 0 });
@@ -119,6 +120,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
   //   isListening ? stopListening() : startListening();
   // };
 
+  // eslint-disable-next-line no-unused-vars
   const startListening = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -143,6 +145,7 @@ const ChatInput = ({ onSendMessage, disabled }) => {
     window.recognition = recognition;
   };
 
+  // eslint-disable-next-line no-unused-vars
   const stopListening = () => {
     window.recognition?.stop();
     setIsListening(false);

@@ -8,12 +8,6 @@ import {
   PiBinoculars,
   PiLeaf,
 } from 'react-icons/pi';
-import {
-  FaMicrophone,
-  FaMicrophoneSlash,
-  FaPaperPlane,
-} from 'react-icons/fa';
-import { HiOutlineAdjustmentsHorizontal } from 'react-icons/hi2';
 
 const ChatInput = ({ onSendMessage, disabled }) => {
   const [message, setMessage] = useState('');
@@ -120,9 +114,10 @@ const ChatInput = ({ onSendMessage, disabled }) => {
     }
   };
 
-  const toggleSpeechRecognition = () => {
-    isListening ? stopListening() : startListening();
-  };
+  // Commented out as it's currently unused
+  // const toggleSpeechRecognition = () => {
+  //   isListening ? stopListening() : startListening();
+  // };
 
   const startListening = () => {
     const SpeechRecognition =

@@ -291,7 +291,7 @@ useEffect(() => {
           const newMessages = messages.slice(0, -1);
           
           // Add feedback message for rewording
-          const feedbackMessage = createAssistantMessage("Good decision about rewording your prompt! Specific, concise, and combined prompts saves energy. Your efforts to promote eco-friendly practices are truly inspiring.");
+          const feedbackMessage = createAssistantMessage("*Good decision about rewording your prompt! Specific, concise, and combined prompts saves energy. Your efforts to promote eco-friendly practices are truly inspiring.*");
           feedbackMessage.timestamp = new Date().toISOString();
           
           setMessages([...newMessages, feedbackMessage]);
@@ -379,7 +379,7 @@ useEffect(() => {
                 const userIdMessage = showUserId && userId ? `\n\nYour User ID is: ${userId}` : '';
                 
                 // New thank you message with sustainability focus
-                const thankYouMessage = createAssistantMessage(`Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.${userIdMessage}`);
+                const thankYouMessage = createAssistantMessage(`*Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.*${userIdMessage}`);
                 thankYouMessage.timestamp = new Date().toISOString();
                 
                 // Add a flag to identify this as a break message for styling
@@ -418,7 +418,7 @@ useEffect(() => {
               
               // Still show thank you message after error
               setTimeout(() => {
-                const thankYouMessage = createAssistantMessage("Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.");
+                const thankYouMessage = createAssistantMessage("*Thanks for taking a break! I really admire how committed you are to reducing data waste and living sustainably.*");
                 thankYouMessage.timestamp = new Date().toISOString();
                 thankYouMessage.isBreakMessage = true;
                 

@@ -60,7 +60,7 @@ export const getSustainabilityInteractionsByChoice = query({
   },
 });
 
-// Store sustainability prompt response in messages_info table
+// Placeholder for storeInfoPromptResponse (messages_info table has been removed)
 export const storeInfoPromptResponse = mutation({
   args: {
     userId: v.string(),
@@ -69,13 +69,10 @@ export const storeInfoPromptResponse = mutation({
   handler: async (ctx, args) => {
     const { userId, response } = args;
     
-    // Store the response in the messages_info table with simplified schema
-    // Using Convex's built-in _creationTime instead of timestamp
-    const id = await ctx.db.insert("messages_info", {
-      userId,
-      info_prompt: response, // Store 'yes' or 'no'
-    });
+    // Table has been removed, just log the response and return a mock ID
+    console.log(`User ${userId} responded with ${response} to sustainability prompt`);
     
-    return id;
+    // Return a mock ID since we're not actually storing anything
+    return "table-removed-" + Date.now();
   },
 });

@@ -16,10 +16,13 @@ export default defineSchema({
     response: v.string(),
   }),
   
-  // Table to store message information
-  messages_info: defineTable({
-    userId: v.string(), // User who sent the message
-    info_prompt: v.optional(v.string()), // User response to sustainability prompt (yes/no)
-    // Using Convex's built-in _creationTime for timestamp
+  // New table to track sustainability prompt interactions
+  message_one: defineTable({
+    userId: v.string(), // User ID
+    info_message: v.string(), // User's choice for first message (yes/no)
+    reword_choice: v.optional(v.string()), // User's choice to reword or continue (optional)
+    break_message: v.optional(v.string()), // User's choice for break message (break/continue)
   }),
+  
+  // messages_info table has been removed
 });

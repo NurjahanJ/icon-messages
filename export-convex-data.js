@@ -82,8 +82,16 @@ async function exportConvexData() {
     // Export users table if it exists
     try {
       console.log("Exporting users...");
-      const users = await client.query("users:getAllUsers");
-      writeToCSV(users, 'users.csv');
+      const allUsers = await client.query("users:getAllUsers");
+      
+      // Filter out users with zero prompts
+      const usersWithPrompts = allUsers.filter(user => {
+        // Check if promptCounter exists and is greater than 0
+        return user.promptCounter && user.promptCounter > 0;
+      });
+      
+      console.log(`Filtered out ${allUsers.length - usersWithPrompts.length} users with zero prompts`);
+      writeToCSV(usersWithPrompts, 'users.csv');
     } catch (error) {
       console.log("Note: Users table export failed. This may be expected if the table or query doesn't exist.");
     }

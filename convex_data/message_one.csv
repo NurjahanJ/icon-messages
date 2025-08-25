@@ -1,8 +1,9 @@
-_creationTime,_id,info_message,reword_choice,timestamp,userId
-1756079799921.8499,"k172m93bbwjqx2tf2wjfpczzfn7p84xc","yes","reword",1756079801433,"eNQvLsZVNf"
-1756077859286.5613,"k1705pcfw9r997wdfwk40dnets7p9d4m","yes","reword",1756077874974,"R-OuIKOWjD"
-1756077061115.5115,"k17e2e6zyk4fnmv3wgs1bzs7ch7p8ck4","yes","reword",1756077064751,"X65nQymaGV"
-1756076906749.6284,"k17crzm7p6zfqhtdn3k2wj0vws7p9vdh","yes","reword",1756076915981,"p9LfXQg_Fn"
-1756076186884.2935,"k17c36gmjs6p6nh6252a8rgkth7p8319","no",,1756076199323,"p0J5yxUucb"
-1756075757622.9744,"k17e28d3xqvn661c558gfx9vdx7p9p8y","yes","reword",1756075769717,"p0J5yxUucb"
-1756064606137.6711,"k17fyg189b2gfpfnvvs3ama0sh7p8hq7","yes","continue",1756064619160,"p9LfXQg_Fn"
+_creationTime,_id,break_message,info_message,reword_choice,timestamp,userId
+1756084887580.0308,"k170f18cyzgfta5sdxkc48q2ax7pbpe4","break","yes","reword",1756084898210,"Q_ZAAE9ILI"
+1756079799921.8499,"k172m93bbwjqx2tf2wjfpczzfn7p84xc",,"yes","reword",1756079801433,"eNQvLsZVNf"
+1756077859286.5613,"k1705pcfw9r997wdfwk40dnets7p9d4m","break","yes","reword",1756077874974,"R-OuIKOWjD"
+1756077061115.5115,"k17e2e6zyk4fnmv3wgs1bzs7ch7p8ck4",,"yes","reword",1756077064751,"X65nQymaGV"
+1756076906749.6284,"k17crzm7p6zfqhtdn3k2wj0vws7p9vdh","break","yes","reword",1756076915981,"p9LfXQg_Fn"
+1756076186884.2935,"k17c36gmjs6p6nh6252a8rgkth7p8319","continue","no",,1756076199323,"p0J5yxUucb"
+1756075757622.9744,"k17e28d3xqvn661c558gfx9vdx7p9p8y","break","yes","reword",1756075769717,"p0J5yxUucb"
+1756064606137.6711,"k17fyg189b2gfpfnvvs3ama0sh7p8hq7","break","yes","continue",1756064619160,"p9LfXQg_Fn"

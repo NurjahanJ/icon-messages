@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../api/convexApi';
+import { useUser } from '../contexts/ConvexContext';
 
 /**
  * Service for interacting with Convex database

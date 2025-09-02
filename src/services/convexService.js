@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../api/convexApi';
+import { useUser } from '../contexts/ConvexContext';
 
 /**
  * Service for interacting with Convex database
@@ -15,37 +16,70 @@ export const useGetUserId = () => {
   };
 };
 
-// Store a conversation in Convex
+// Store a conversation in Convex with enhanced reliability
 export const useStoreConversation = () => {
   const storeConversationMutation = useMutation(api.conversations.storeConversation);
+  const { userId: contextUserId, isInitialized } = useUser();
   
-  return async (prompt, response) => {
-    try {
-      // Get user ID from localStorage
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
-        return null;
+  return async (prompt, response, maxRetries = 3) => {
+    // Track retry attempts
+    let retries = 0;
+    
+    // Function to attempt storage with retry logic
+    const attemptStore = async () => {
+      try {
+        // First try to use userId from context if available
+        let effectiveUserId = contextUserId;
+        
+        // Fall back to localStorage if context isn't available
+        if (!effectiveUserId) {
+          effectiveUserId = localStorage.getItem('userId');
+          console.log('Using userId from localStorage as fallback:', effectiveUserId);
+        }
+        
+        if (!effectiveUserId) {
+          console.error('No user ID found in context or localStorage');
+          return null;
+        }
+        
+        // Store the conversation in Convex
+        const conversationId = await storeConversationMutation({
+          userId: effectiveUserId,
+          prompt,
+          response,
+        });
+        
+        console.log('Conversation stored successfully with ID:', conversationId);
+        return conversationId;
+      } catch (error) {
+        retries++;
+        console.error(`Error storing conversation (attempt ${retries}/${maxRetries}):`, error);
+        
+        if (retries < maxRetries) {
+          // Wait before retry with exponential backoff
+          const delay = Math.min(1000 * Math.pow(2, retries - 1), 8000);
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return attemptStore(); // Recursive retry
+        } else {
+          // Log conversation to console as fallback after all retries fail
+          console.log('Conversation (fallback after retries):', { 
+            userId: contextUserId || localStorage.getItem('userId'), 
+            prompt, 
+            response 
+          });
+          return null;
+        }
       }
-      
-      // Store the conversation in Convex
-      const conversationId = await storeConversationMutation({
-        userId,
-        prompt,
-        response,
-      });
-      
-      return conversationId;
-    } catch (error) {
-      console.error('Error storing conversation:', error);
-      // Log conversation to console as fallback
-      console.log('Conversation (fallback):', { 
-        userId: localStorage.getItem('userId'), 
-        prompt, 
-        response 
-      });
-      return null;
+    };
+    
+    // If user initialization is still in progress, wait briefly before attempting
+    if (!isInitialized) {
+      console.log('User not yet initialized, waiting before storing conversation...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
+    
+    return attemptStore();
   };
 };
 

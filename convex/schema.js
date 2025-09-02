@@ -22,6 +22,7 @@ export default defineSchema({
     info_message: v.string(), // User's choice for first message (yes/no)
     reword_choice: v.optional(v.string()), // User's choice to reword or continue (optional)
     break_message: v.optional(v.string()), // User's choice for break message (break/continue)
+    timestamp: v.optional(v.number()), // Timestamp when the choice was made
   }),
   
   // messages_info table has been removed

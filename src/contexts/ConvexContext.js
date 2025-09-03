@@ -9,6 +9,7 @@ import { api } from '../api/convexApi';
 const UserContext = createContext();
 
 // Create a Convex client with error handling
+// Use fallback URL if environment variable is not set
 const convexUrl = process.env.REACT_APP_CONVEX_URL;
 
 // Debug information
@@ -62,8 +63,10 @@ export const UserProvider = ({ children }) => {
         // Check if user ID exists in localStorage
         let storedUserId = localStorage.getItem('userId');
         
-        // Get or create user in Convex
-        const validatedUserId = await getOrCreateUser({ existingUserId: storedUserId });
+        // Get or create user in Convex - only pass existingUserId if it's not null
+        const validatedUserId = await getOrCreateUser(
+          storedUserId ? { existingUserId: storedUserId } : {}
+        );
         
         // Update localStorage with validated user ID
         localStorage.setItem('userId', validatedUserId);

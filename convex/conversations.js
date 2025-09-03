@@ -7,9 +7,10 @@ export const storeConversation = mutation({
     userId: v.string(),
     prompt: v.string(),
     response: v.string(),
+    timestamp: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { userId, prompt, response } = args;
+    const { userId, prompt, response, timestamp } = args;
     
     // Get the user's previous conversations to calculate promptCounter
     const userConversations = await ctx.db
@@ -35,12 +36,13 @@ export const storeConversation = mutation({
       promptCounter: (user.promptCounter || 0) + 1 
     });
     
-    // Store the conversation in the database with promptCounter
+    // Store the conversation in the database with promptCounter and timestamp
     const conversationId = await ctx.db.insert("conversations", {
       userId,
       prompt,
       response,
       promptCounter,
+      timestamp: timestamp || Date.now(),
     });
     
     return conversationId;

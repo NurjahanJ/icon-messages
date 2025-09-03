@@ -14,9 +14,10 @@ export default defineSchema({
     promptCounter: v.number(),
     prompt: v.string(),
     response: v.string(),
+    timestamp: v.optional(v.number()), // Changed from string to number type
   }),
   
-  // New table to track sustainability prompt interactions
+  // Table to track sustainability prompt interactions
   message_one: defineTable({
     userId: v.string(), // User ID
     info_message: v.string(), // User's choice for first message (yes/no)
@@ -25,5 +26,14 @@ export default defineSchema({
     timestamp: v.optional(v.number()), // Timestamp when the choice was made
   }),
   
-  // messages_info table has been removed
+  // Add sustainability table to match API endpoints
+  sustainability: defineTable({
+    userId: v.string(), // User ID
+    interactionType: v.string(), // Type of interaction (info_prompt, rewrite_prompt, break_prompt, etc.)
+    userChoice: v.string(), // User's choice
+    originalPrompt: v.optional(v.string()), // Original prompt for rewritten content
+    rewrittenPrompt: v.optional(v.string()), // Rewritten prompt
+    rewrittenResponse: v.optional(v.string()), // Response to rewritten prompt
+    timestamp: v.optional(v.number()), // Timestamp when the interaction occurred
+  }),
 });

@@ -1,14 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { v4 as uuidv4 } from "uuid";
 
-// This file contains placeholder functions for sustainability interactions
-// These functions maintain API compatibility for frontend components
-
-// Placeholder functions that return empty data or success messages
-// These prevent errors in the frontend code that might still reference these functions
-
-// Placeholder for storeSustainabilityInteraction
+// Store sustainability interaction data
 export const storeSustainabilityInteraction = mutation({
   args: {
     userId: v.string(),
@@ -17,50 +10,74 @@ export const storeSustainabilityInteraction = mutation({
     originalPrompt: v.optional(v.string()),
     rewrittenPrompt: v.optional(v.string()),
     rewrittenResponse: v.optional(v.string()),
+    timestamp: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    // Return a mock ID since we're not actually storing anything
-    return "sustainability-removed-" + Date.now();
+    const { userId, interactionType, userChoice, originalPrompt, rewrittenPrompt, rewrittenResponse } = args;
+    
+    // Store the interaction in the sustainability table
+    const interactionId = await ctx.db.insert("sustainability", {
+      userId,
+      interactionType,
+      userChoice,
+      originalPrompt,
+      rewrittenPrompt,
+      rewrittenResponse,
+      timestamp: args.timestamp || Date.now(),
+    });
+    
+    return interactionId;
   },
 });
 
-// Placeholder for getUserSustainabilityInteractions
+// Get sustainability interactions for a specific user
 export const getUserSustainabilityInteractions = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
-    // Return empty array
-    return [];
+    return await ctx.db
+      .query("sustainability")
+      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .order("desc", (q) => q.field("timestamp"))
+      .collect();
   },
 });
 
-// Placeholder for getAllSustainabilityInteractions
+// Get all sustainability interactions (admin function)
 export const getAllSustainabilityInteractions = query({
   args: {},
   handler: async (ctx) => {
-    // Return empty array
-    return [];
+    return await ctx.db
+      .query("sustainability")
+      .order("desc", (q) => q.field("timestamp"))
+      .collect();
   },
 });
 
-// Placeholder for getSustainabilityInteractionsByType
+// Get sustainability interactions by type
 export const getSustainabilityInteractionsByType = query({
   args: { interactionType: v.string() },
   handler: async (ctx, args) => {
-    // Return empty array
-    return [];
+    return await ctx.db
+      .query("sustainability")
+      .filter((q) => q.eq(q.field("interactionType"), args.interactionType))
+      .order("desc", (q) => q.field("timestamp"))
+      .collect();
   },
 });
 
-// Placeholder for getSustainabilityInteractionsByChoice
+// Get sustainability interactions by user choice
 export const getSustainabilityInteractionsByChoice = query({
   args: { userChoice: v.string() },
   handler: async (ctx, args) => {
-    // Return empty array
-    return [];
+    return await ctx.db
+      .query("sustainability")
+      .filter((q) => q.eq(q.field("userChoice"), args.userChoice))
+      .order("desc", (q) => q.field("timestamp"))
+      .collect();
   },
 });
 
-// Placeholder for storeInfoPromptResponse (messages_info table has been removed)
+// Store info prompt response in the sustainability table
 export const storeInfoPromptResponse = mutation({
   args: {
     userId: v.string(),
@@ -69,10 +86,14 @@ export const storeInfoPromptResponse = mutation({
   handler: async (ctx, args) => {
     const { userId, response } = args;
     
-    // Table has been removed, just log the response and return a mock ID
-    console.log(`User ${userId} responded with ${response} to sustainability prompt`);
+    // Store the response in the sustainability table
+    const interactionId = await ctx.db.insert("sustainability", {
+      userId,
+      interactionType: "info_prompt",
+      userChoice: response,
+      timestamp: Date.now(),
+    });
     
-    // Return a mock ID since we're not actually storing anything
-    return "table-removed-" + Date.now();
+    return interactionId;
   },
 });

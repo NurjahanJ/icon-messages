@@ -1,8 +1,19 @@
-// Script to export Convex data to CSV files using Convex CLI
+// Script to export Convex data to CSV files
+const { ConvexHttpClient } = require("convex/browser");
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
 require("dotenv").config();
+
+// Get the Convex URL from environment variables
+const convexUrl = process.env.REACT_APP_CONVEX_URL || process.env.CONVEX_URL;
+
+if (!convexUrl) {
+  console.error("Error: CONVEX_URL or REACT_APP_CONVEX_URL environment variable not set");
+  process.exit(1);
+}
+
+// Initialize Convex client
+const client = new ConvexHttpClient(convexUrl);
 
 // Directory to save CSV files
 const outputDir = path.join(__dirname, "convex_data");
@@ -12,44 +23,7 @@ if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
 }
 
-// Function to run Convex CLI commands
-function runConvexCommand(command) {
-  try {
-    console.log(`Running: npx convex ${command}`);
-    return execSync(`npx convex ${command}`, { encoding: 'utf8' });
-  } catch (error) {
-    console.error(`Error running Convex command: ${command}`);
-    console.error(error.message);
-    return null;
-  }
-}
-
-// Export tables to CSV files
-async function exportTables() {
-  try {
-    console.log('Starting export of Convex data to CSV...');
-    
-    // Export users table
-    console.log('Exporting users table...');
-    runConvexCommand('export users --to-csv ' + path.join(outputDir, 'users.csv'));
-    
-    // Export conversations table
-    console.log('Exporting conversations table...');
-    runConvexCommand('export conversations --to-csv ' + path.join(outputDir, 'conversations.csv'));
-    
-    // Export message_one table
-    console.log('Exporting message_one table...');
-    runConvexCommand('export message_one --to-csv ' + path.join(outputDir, 'message_one.csv'));
-    
-    console.log('Export completed successfully!');
-  } catch (error) {
-    console.error('Error exporting data:', error);
-    process.exit(1);
-  }
-}
-
-// Run the export
-exportTables();
+// Function to convert data to CSV format
 function convertToCSV(data) {
   if (data.length === 0) {
     return "";
@@ -70,12 +44,12 @@ function convertToCSV(data) {
         return "";
       } else if (typeof value === "string") {
         // Escape quotes and wrap in quotes
-        return `"${value.replace(/"/g, '""')}"`;
+        return `"${value.replace(/"/g, '""')}"`;      
       } else if (value instanceof Date) {
-        return `"${value.toLocaleString()}"`;
+        return `"${value.toLocaleString()}"`;      
       } else if (typeof value === "object") {
         // Convert objects to JSON strings
-        return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+        return `"${JSON.stringify(value).replace(/"/g, '""')}"`;      
       }
       return value;
     });
@@ -85,8 +59,8 @@ function convertToCSV(data) {
   return csvRows.join("\n");
 }
 
-// Save data to CSV file
-function saveToCSV(data, filename) {
+// Function to write data to a CSV file
+function writeToCSV(data, filename) {
   const csvData = convertToCSV(data);
   const filePath = path.join(outputDir, filename);
   
@@ -94,32 +68,44 @@ function saveToCSV(data, filename) {
   console.log(`Exported ${data.length} records to ${filePath}`);
 }
 
-// Export tables
-async function exportTables() {
+// Main export function
+async function exportConvexData() {
   try {
-    console.log("Starting export of Convex data to CSV...");
-    
-    // Export users table
-    console.log("Exporting users table...");
-    const users = await client.query(api.users.getAllUsers);
-    saveToCSV(users, "users.csv");
+    console.log("Starting Convex data export...");
     
     // Export conversations table
-    console.log("Exporting conversations table...");
-    const conversations = await client.query(api.conversations.getAllConversations);
-    saveToCSV(conversations, "conversations.csv");
+    console.log("Exporting conversations...");
+    const conversations = await client.query("conversations:getAllConversations");
+    writeToCSV(conversations, 'conversations.csv');
     
     // Export message_one table
-    console.log("Exporting message_one table...");
-    const messageOne = await client.query(api.message_one.getAllMessages);
-    saveToCSV(messageOne, "message_one.csv");
+    console.log("Exporting message_one data...");
+    const messageChoices = await client.query("message_one:getAllMessageChoices");
+    writeToCSV(messageChoices, 'message_one.csv');
     
-    console.log("Export completed successfully!");
+    // Export users table if it exists
+    try {
+      console.log("Exporting users...");
+      const allUsers = await client.query("users:getAllUsers");
+      
+      // Filter out users with zero prompts
+      const usersWithPrompts = allUsers.filter(user => {
+        // Check if promptCounter exists and is greater than 0
+        return user.promptCounter && user.promptCounter > 0;
+      });
+      
+      console.log(`Filtered out ${allUsers.length - usersWithPrompts.length} users with zero prompts`);
+      writeToCSV(usersWithPrompts, 'users.csv');
+    } catch (error) {
+      console.log("Note: Users table export failed. This may be expected if the table or query doesn't exist.");
+      console.error(error);
+    }
+    
+    console.log("Convex data export completed successfully!");
   } catch (error) {
-    console.error("Error exporting data:", error);
-    process.exit(1);
+    console.error("Error exporting Convex data:", error);
   }
 }
 
 // Run the export
-exportTables();
+exportConvexData().catch(console.error);

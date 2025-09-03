@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from 'convex/react';
 import { api } from '../api/convexApi';
 import { useUser } from '../contexts/ConvexContext';
+import { nanoid } from 'nanoid';
 
 /**
  * Service for interacting with Convex database
@@ -19,9 +20,10 @@ export const useGetUserId = () => {
 // Store a conversation in Convex with enhanced reliability
 export const useStoreConversation = () => {
   const storeConversationMutation = useMutation(api.conversations.storeConversation);
-  const { userId: contextUserId, isInitialized } = useUser();
+  const createUserMutation = useMutation(api.users.getOrCreateUser);
+  const { userId: contextUserId, isInitialized, initializationError } = useUser();
   
-  return async (prompt, response, maxRetries = 3) => {
+  return async (prompt, response, maxRetries = 5) => {
     // Track retry attempts
     let retries = 0;
     
@@ -34,12 +36,23 @@ export const useStoreConversation = () => {
         // Fall back to localStorage if context isn't available
         if (!effectiveUserId) {
           effectiveUserId = localStorage.getItem('userId');
-          console.log('Using userId from localStorage as fallback:', effectiveUserId);
+          console.log('Using userId from localStorage as fallback:', effectiveUserId ? `${effectiveUserId.substring(0, 4)}...` : 'null');
         }
         
         if (!effectiveUserId) {
           console.error('No user ID found in context or localStorage');
-          return null;
+          // Generate a new user ID as last resort
+          effectiveUserId = nanoid(10);
+          localStorage.setItem('userId', effectiveUserId);
+          console.log('Generated new userId as last resort:', `${effectiveUserId.substring(0, 4)}...`);
+          
+          // Try to create this user in the database
+          try {
+            await createUserMutation({});
+            console.log('Created new user in database');
+          } catch (userCreateError) {
+            console.error('Failed to create new user in database:', userCreateError);
+          }
         }
         
         // Store the conversation in Convex
@@ -55,6 +68,24 @@ export const useStoreConversation = () => {
       } catch (error) {
         retries++;
         console.error(`Error storing conversation (attempt ${retries}/${maxRetries}):`, error);
+        
+        // Check for specific error types
+        const errorMessage = error.toString().toLowerCase();
+        
+        // If the error indicates the user doesn't exist, try to create the user
+        if (errorMessage.includes('user') && errorMessage.includes('not found') && retries <= 2) {
+          try {
+            console.log('User not found, attempting to create user...');
+            const userId = await createUserMutation({});
+            console.log('Created new user with ID:', `${userId.substring(0, 4)}...`);
+            localStorage.setItem('userId', userId);
+            
+            // No need to increment retry counter for this special case
+            retries--;
+          } catch (userCreateError) {
+            console.error('Failed to create user:', userCreateError);
+          }
+        }
         
         if (retries < maxRetries) {
           // Wait before retry with exponential backoff
@@ -78,7 +109,12 @@ export const useStoreConversation = () => {
     // If user initialization is still in progress, wait briefly before attempting
     if (!isInitialized) {
       console.log('User not yet initialized, waiting before storing conversation...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Increased wait time
+    }
+    
+    // If there was an initialization error, log it but still try to store
+    if (initializationError) {
+      console.warn('Proceeding with conversation storage despite initialization error:', initializationError);
     }
     
     return attemptStore();

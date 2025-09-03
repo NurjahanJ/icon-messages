@@ -22,13 +22,25 @@ export const storeConversation = mutation({
     const promptCounter = userConversations.length + 1;
     
     // Check if user exists
-    const user = await ctx.db
+    let user = await ctx.db
       .query("users")
       .filter((q) => q.eq(q.field("userId"), userId))
       .first();
     
+    // If user doesn't exist, create them
     if (!user) {
-      throw new Error(`User with ID ${userId} not found`);
+      console.log(`User with ID ${userId} not found, creating a new user record`);
+      const newUserId = await ctx.db.insert("users", {
+        userId,
+        promptCounter: 0, // Initialize prompt counter
+      });
+      
+      // Fetch the newly created user
+      user = await ctx.db.get(newUserId);
+      
+      if (!user) {
+        throw new Error(`Failed to create user with ID ${userId}`);
+      }
     }
     
     // Update user's total prompts count

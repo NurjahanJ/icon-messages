@@ -47,6 +47,7 @@ export const useStoreConversation = () => {
           userId: effectiveUserId,
           prompt,
           response,
+          timestamp: Date.now(),
         });
         
         console.log('Conversation stored successfully with ID:', conversationId);
@@ -66,7 +67,8 @@ export const useStoreConversation = () => {
           console.log('Conversation (fallback after retries):', { 
             userId: contextUserId || localStorage.getItem('userId'), 
             prompt, 
-            response 
+            response,
+            timestamp: Date.now()
           });
           return null;
         }
@@ -100,17 +102,25 @@ export const useGetAllConversations = () => {
 // Store sustainability info prompt interaction (first prompt)
 export const useStoreSustainabilityChoice = () => {
   const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  const { userId, isInitialized } = useUser();
   
   return async (choice) => {
     try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
+      // Wait for user initialization if needed
+      if (!isInitialized) {
+        console.log('Waiting for user initialization before storing sustainability choice...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Get userId from context or localStorage
+      const effectiveUserId = userId || localStorage.getItem('userId');
+      if (!effectiveUserId) {
+        console.error('No user ID found in context or localStorage');
         return null;
       }
       
       const interactionId = await storeSustainabilityInteractionMutation({
-        userId,
+        userId: effectiveUserId,
         interactionType: 'info_prompt',
         userChoice: choice, // 'yes' or 'no'
         timestamp: Date.now(),
@@ -129,17 +139,25 @@ export const useStoreSustainabilityChoice = () => {
 // Store reword prompt interaction (second prompt)
 export const useStoreRewordChoice = () => {
   const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  const { userId, isInitialized } = useUser();
   
   return async (choice) => {
     try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
+      // Wait for user initialization if needed
+      if (!isInitialized) {
+        console.log('Waiting for user initialization before storing reword choice...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Get userId from context or localStorage
+      const effectiveUserId = userId || localStorage.getItem('userId');
+      if (!effectiveUserId) {
+        console.error('No user ID found in context or localStorage');
         return null;
       }
       
       const interactionId = await storeSustainabilityInteractionMutation({
-        userId,
+        userId: effectiveUserId,
         interactionType: 'rewrite_prompt',
         userChoice: choice, // 'continue' or 'rewrite'
         timestamp: Date.now(),
@@ -158,17 +176,25 @@ export const useStoreRewordChoice = () => {
 // Store reworded prompt and its response
 export const useStoreRewordedPrompt = () => {
   const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  const { userId, isInitialized } = useUser();
   
   return async (originalPrompt, rewrittenPrompt, rewrittenResponse) => {
     try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
+      // Wait for user initialization if needed
+      if (!isInitialized) {
+        console.log('Waiting for user initialization before storing reworded prompt...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Get userId from context or localStorage
+      const effectiveUserId = userId || localStorage.getItem('userId');
+      if (!effectiveUserId) {
+        console.error('No user ID found in context or localStorage');
         return null;
       }
       
       const interactionId = await storeSustainabilityInteractionMutation({
-        userId,
+        userId: effectiveUserId,
         interactionType: 'rewritten_content',
         userChoice: 'rewrite',
         originalPrompt,
@@ -177,7 +203,7 @@ export const useStoreRewordedPrompt = () => {
         timestamp: Date.now(),
       });
       
-      console.log('Reworded prompt stored');
+      console.log('Reworded prompt stored successfully');
       return interactionId;
     } catch (error) {
       console.error('Error storing reworded prompt:', error);
@@ -190,19 +216,27 @@ export const useStoreRewordedPrompt = () => {
 // Store break choice interaction (third prompt)
 export const useStoreBreakChoice = () => {
   const storeSustainabilityInteractionMutation = useMutation(api.sustainability.storeSustainabilityInteraction);
+  const { userId, isInitialized } = useUser();
   
   return async (choice) => {
     try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        console.error('No user ID found in localStorage');
+      // Wait for user initialization if needed
+      if (!isInitialized) {
+        console.log('Waiting for user initialization before storing break choice...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Get userId from context or localStorage
+      const effectiveUserId = userId || localStorage.getItem('userId');
+      if (!effectiveUserId) {
+        console.error('No user ID found in context or localStorage');
         return null;
       }
       
       const interactionId = await storeSustainabilityInteractionMutation({
-        userId,
+        userId: effectiveUserId,
         interactionType: 'break_prompt',
-        userChoice: choice, // 'continue' or 'take_break'
+        userChoice: choice, // 'continue' or 'break'
         timestamp: Date.now(),
       });
       

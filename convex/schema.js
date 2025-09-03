@@ -26,14 +26,5 @@ export default defineSchema({
     timestamp: v.optional(v.number()), // Timestamp when the choice was made
   }),
   
-  // Add sustainability table to match API endpoints
-  sustainability: defineTable({
-    userId: v.string(), // User ID
-    interactionType: v.string(), // Type of interaction (info_prompt, rewrite_prompt, break_prompt, etc.)
-    userChoice: v.string(), // User's choice
-    originalPrompt: v.optional(v.string()), // Original prompt for rewritten content
-    rewrittenPrompt: v.optional(v.string()), // Rewritten prompt
-    rewrittenResponse: v.optional(v.string()), // Response to rewritten prompt
-    timestamp: v.optional(v.number()), // Timestamp when the interaction occurred
-  }),
+  // Sustainability table removed
 });

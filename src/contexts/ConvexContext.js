@@ -55,30 +55,49 @@ export const ConvexProviderWrapper = ({ children }) => {
 export const UserProvider = ({ children }) => {
   const [userId, setUserId] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [initializationError, setInitializationError] = useState(null);
   const getOrCreateUser = useMutation(api.users.getOrCreateUser);
 
   useEffect(() => {
-    const initializeUser = async () => {
+    const initializeUser = async (retryCount = 0, maxRetries = 3) => {
       try {
+        console.log(`Attempting to initialize user (attempt ${retryCount + 1}/${maxRetries + 1})`);
+        
         // Check if user ID exists in localStorage
         let storedUserId = localStorage.getItem('userId');
+        console.log('Stored userId from localStorage:', storedUserId ? `${storedUserId.substring(0, 4)}...` : 'null');
         
         // Get or create user in Convex - only pass existingUserId if it's not null
         const validatedUserId = await getOrCreateUser(
           storedUserId ? { existingUserId: storedUserId } : {}
         );
         
+        if (!validatedUserId) {
+          throw new Error('Received null or undefined userId from Convex');
+        }
+        
         // Update localStorage with validated user ID
         localStorage.setItem('userId', validatedUserId);
         setUserId(validatedUserId);
-        console.log('User initialized successfully with ID:', validatedUserId);
+        setInitializationError(null);
+        console.log('User initialized successfully with ID:', `${validatedUserId.substring(0, 4)}...`);
       } catch (error) {
-        console.error('Error initializing user:', error);
-        // Fallback to local user ID if Convex fails
+        console.error(`Error initializing user (attempt ${retryCount + 1}):`, error);
+        
+        // Retry logic with exponential backoff
+        if (retryCount < maxRetries) {
+          const delay = Math.min(1000 * Math.pow(2, retryCount), 8000);
+          console.log(`Retrying user initialization in ${delay}ms...`);
+          setTimeout(() => initializeUser(retryCount + 1, maxRetries), delay);
+          return;
+        }
+        
+        // After all retries, fall back to local user ID
+        setInitializationError(error.message);
         const fallbackUserId = localStorage.getItem('userId') || nanoid(10);
         localStorage.setItem('userId', fallbackUserId);
         setUserId(fallbackUserId);
-        console.log('User initialized with fallback ID:', fallbackUserId);
+        console.log('User initialized with fallback ID:', `${fallbackUserId.substring(0, 4)}...`);
       } finally {
         setIsInitialized(true);
       }
@@ -100,7 +119,12 @@ export const UserProvider = ({ children }) => {
   }
 
   return (
-    <UserContext.Provider value={{ userId, setUserId, isInitialized }}>
+    <UserContext.Provider value={{ 
+      userId, 
+      setUserId, 
+      isInitialized,
+      initializationError
+    }}>
       {children}
     </UserContext.Provider>
   );

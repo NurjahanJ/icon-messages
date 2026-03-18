@@ -1,8 +1,8 @@
 // Serverless function for OpenAI chat API
-const axios = require('axios');
+import axios from 'axios';
 
 // This function will be executed when the endpoint is called
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Log request information for debugging
   console.log('API Request received:', { 
     method: req.method,
@@ -97,4 +97,4 @@ module.exports = async (req, res) => {
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
-};
+}

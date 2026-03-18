@@ -63,8 +63,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // Serve static files in production
-if (fs.existsSync(path.join(__dirname, 'build'))) {
-  app.use(express.static(path.join(__dirname, 'build')));
+if (fs.existsSync(path.join(__dirname, 'dist'))) {
+  app.use(express.static(path.join(__dirname, 'dist')));
   
   // For all other routes, serve the React app
   app.get('*', (req, res) => {
@@ -73,7 +73,7 @@ if (fs.existsSync(path.join(__dirname, 'build'))) {
       return res.status(404).json({ error: 'API endpoint not found' });
     }
     
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
   });
 }
 

@@ -5,7 +5,7 @@ const path = require('path');
 console.log('🚀 Starting ChatGPT Interface...');
 
 // Check if build directory exists
-const buildDir = path.join(__dirname, 'build');
+const buildDir = path.join(__dirname, 'dist');
 const buildExists = fs.existsSync(buildDir) && 
                    fs.existsSync(path.join(buildDir, 'index.html'));
 

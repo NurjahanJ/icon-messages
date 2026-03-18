@@ -10,16 +10,16 @@ const UserContext = createContext();
 
 // Create a Convex client with error handling
 // Use fallback URL if environment variable is not set
-const convexUrl = process.env.REACT_APP_CONVEX_URL;
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
 
 // Debug information
 console.log('ConvexContext initialization');
-console.log('REACT_APP_CONVEX_URL:', convexUrl ? '✅ URL exists' : '❌ URL missing');
+console.log('VITE_CONVEX_URL:', convexUrl ? '✅ URL exists' : '❌ URL missing');
 
 let convexClient;
 try {
   if (!convexUrl) {
-    throw new Error('REACT_APP_CONVEX_URL is not defined in environment variables');
+    throw new Error('VITE_CONVEX_URL is not defined in environment variables');
   }
   convexClient = new ConvexReactClient(convexUrl);
   console.log('✅ Convex client created successfully');
@@ -39,7 +39,7 @@ export const ConvexProviderWrapper = ({ children }) => {
       <div className="p-4 m-4 border border-red-500 rounded bg-red-50">
         <h2 className="text-xl font-bold text-red-700 mb-2">Convex Connection Error</h2>
         <p className="text-red-600 mb-4">{convexClient.error}</p>
-        <p>Please check your environment variables and make sure REACT_APP_CONVEX_URL is set correctly.</p>
+        <p>Please check your environment variables and make sure VITE_CONVEX_URL is set correctly.</p>
         <p className="mt-2">Current URL: {convexUrl || 'undefined'}</p>
       </div>
     );

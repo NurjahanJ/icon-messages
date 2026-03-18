@@ -18,8 +18,8 @@ class ErrorBoundary extends React.Component {
     
     // Log additional environment information
     console.log("Environment variables available:", {
-      REACT_APP_CONVEX_URL: process.env.REACT_APP_CONVEX_URL ? "✅ Set" : "❌ Missing",
-      NODE_ENV: process.env.NODE_ENV
+      VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL ? "✅ Set" : "❌ Missing",
+      MODE: import.meta.env.MODE
     });
   }
 
@@ -63,8 +63,8 @@ class ErrorBoundary extends React.Component {
             <button 
               className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
               onClick={() => console.log("Environment check:", {
-                REACT_APP_CONVEX_URL: process.env.REACT_APP_CONVEX_URL,
-                NODE_ENV: process.env.NODE_ENV
+                VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
+                MODE: import.meta.env.MODE
               })}
             >
               Log Env Info

@@ -23,7 +23,7 @@ if (!buildExists) {
 console.log('🌐 Starting server...');
 try {
   // Start the server
-  require('./server.js');
+  require('./server.cjs');
 } catch (error) {
   console.error('❌ Server failed to start:', error.message);
   process.exit(1);

@@ -27,10 +27,10 @@
     "web-vitals": "^5.1.0"
   },
   "scripts": {
-    "start": "node start.js",
-    "start-with-convex": "node start-with-convex.js",
+    "start": "node start.cjs",
+    "start-with-convex": "node start-with-convex.cjs",
     "dev": "vite",
-    "dev:server": "nodemon server.js",
+    "dev:server": "nodemon server.cjs",
     "build": "vite build",
     "preview": "vite preview",
     "vercel-build": "vite build"
